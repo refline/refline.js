@@ -1,0 +1,33 @@
+{
+  "name": "reflinejs",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "main": "src/index.tsx",
+  "private": true,
+  "dependencies": {
+    "@types/lodash": "4.14.170",
+    "dom-helpers": "5.2.1",
+    "lodash": "4.17.21",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "with-component-hooks": "^1.1.4"
+  },
+  "devDependencies": {
+    "@types/react": "17.0.0",
+    "@types/react-dom": "17.0.0",
+    "packez": "^4.5.0",
+    "typescript": "4.1.3"
+  },
+  "scripts": {
+    "dev": "packez server ./src/index.tsx -c",
+    "build": "packez build ./src/index.js -c",
+    "analyzer": "packez analyzer ./src/index.js -c"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
+}

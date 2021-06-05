@@ -1,0 +1,60 @@
+{
+  "name": "refline.js",
+  "version": "0.5.0",
+  "description": "",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/lib/index.d.ts",
+  "dependencies": {
+    "@babel/runtime": "^7.12.5"
+  },
+  "devDependencies": {
+    "@types/jest": "^25.1.4",
+    "babel-plugin-lodash": "^3.3.4",
+    "babel-plugin-module-resolver": "^4.1.0",
+    "babel-plugin-search-and-replace": "^1.0.1",
+    "babel-plugin-transform-define": "^2.0.0",
+    "babel-preset-packez": "^1.3.0",
+    "jest": "^25.1.0",
+    "lodash": "^4.17.21",
+    "npm-run-all": "^4.1.5",
+    "packez": "^4.4.1",
+    "react": "^16.13.1",
+    "rimraf": "^3.0.2",
+    "transform-es": "^5.6.1",
+    "typescript": "^4.1.3"
+  },
+  "files": [
+    "dist",
+    "*.md"
+  ],
+  "scripts": {
+    "dev": "tsc -w",
+    "test": "jest",
+    "build": "run-s clean tsc cjs esm",
+    "cjs": "transform-es src -d dist/cjs -c -t cjs",
+    "esm": "transform-es src -d dist/esm -c -t esm",
+    "tsc": "tsc",
+    "clean": "rimraf dist",
+    "prepublishOnly": "run-s test build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/refline/refline.js.git"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "keywords": [
+    "refline",
+    "refline.js"
+  ],
+  "author": "nobo.zhou@foxmail.com",
+  "license": "MIT",
+  "browserslist": [
+    ">0.25%",
+    "not dead",
+    "not ie <= 10",
+    "not op_mini all"
+  ]
+}
