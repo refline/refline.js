@@ -60,3 +60,9 @@ export enum MOVE_DIR {
   MOVE_LEFT,
   NONE,
 }
+
+export interface AdsorbLine {
+  key: string;
+  type: LineType;
+  offset: number;
+}

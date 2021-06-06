@@ -6,6 +6,7 @@ import {
   LineGroup,
   RefLinePosition,
   Delta,
+  AdsorbLine,
 } from "./types";
 import {
   toNumber as fixNumber,
@@ -24,11 +25,14 @@ export * from "./types";
 
 export { fixNumber, coordinateRotation, getBoundingRect, getRectRefLines, mergeRefLineMeta };
 
-export interface RefLineOpts<T extends Rect> {
+export interface RefLineOpts<T extends Rect = Rect> {
   rects: T[];
   current?: T | string;
+  lineFilter?: (line: RefLineMeta) => boolean;
 }
-export class RefLine<T extends Rect> {
+export class RefLine<T extends Rect = Rect> {
+  protected opts: Omit<RefLineOpts<T>, "rects" | "current"> = {};
+  private seq: number = 1;
   protected __rects: T[] = [];
   protected _rects: T[] = [];
   protected current: null | T = null;
@@ -39,6 +43,9 @@ export class RefLine<T extends Rect> {
   // 匹配用 offset : RefLineMeta
   protected _vLineMap: Map<string, RefLineMeta<T>[]> = new Map();
   protected _hLineMap: Map<string, RefLineMeta<T>[]> = new Map();
+  // 自定义吸附线
+  protected _adsorbLines: AdsorbLine[] = [];
+  protected _lineFilter: ((line: RefLineMeta) => boolean) | null = null;
 
   get rects() {
     if (this._dirty) {
@@ -81,7 +88,9 @@ export class RefLine<T extends Rect> {
   }
 
   constructor(opts?: RefLineOpts<T>) {
+    this.opts = opts || {};
     this.__rects = opts?.rects || [];
+    this._lineFilter = opts?.lineFilter || null;
 
     if (opts?.current) {
       this.setCurrent(opts.current);
@@ -118,12 +127,25 @@ export class RefLine<T extends Rect> {
   }
 
   setCurrent(current: T | string | null) {
+    const old = this.getCurrent();
     this.current = current ? this.getRect(current) : null;
-    this._dirty = true;
+
+    if (old?.key !== this.current?.key) {
+      this._dirty = true;
+    }
   }
 
   getCurrent() {
     return this.current;
+  }
+
+  setLineFilter(filter: ((line: RefLineMeta) => boolean) | null) {
+    this._lineFilter = filter;
+    this._dirty = true;
+  }
+
+  getLineFilter() {
+    return this._lineFilter;
   }
 
   protected toLineMapKey<S>(v: S) {
@@ -132,6 +154,25 @@ export class RefLine<T extends Rect> {
 
   protected getLineMapKey(line: RefLineMeta<T>) {
     return this.toLineMapKey(fixNumber(line.offset, 0));
+  }
+
+  protected isEnableLine(line: RefLineMeta<T>) {
+    const filter = this.getLineFilter();
+    if (filter) {
+      return filter(line);
+    }
+
+    return true;
+  }
+
+  protected getRectRefLines(rect: T) {
+    let lines = getRectRefLines(rect);
+
+    if (this.getLineFilter()) {
+      lines = lines.filter(line => this.isEnableLine(line));
+    }
+
+    return lines;
   }
 
   protected initRefLines() {
@@ -144,7 +185,7 @@ export class RefLine<T extends Rect> {
       : [...this.__rects];
 
     this._rects.forEach(rect => {
-      const lines = getRectRefLines(rect);
+      const lines = this.getRectRefLines(rect);
 
       lines.forEach(line => {
         const mKey = this.getLineMapKey(line);
@@ -211,7 +252,7 @@ export class RefLine<T extends Rect> {
 
     if (!current) return matchedLines;
 
-    const cLines = getRectRefLines(current);
+    const cLines = this.getRectRefLines(current);
 
     cLines.forEach(line => {
       if (line.type !== type) return;
@@ -268,7 +309,7 @@ export class RefLine<T extends Rect> {
     const current = this.getCurrent();
     if (!current) return false;
 
-    const lines = getRectRefLines(current);
+    const lines = this.getRectRefLines(current);
     const line = find(lines, line => line.position === position);
 
     if (!line) return false;
@@ -388,6 +429,14 @@ export class RefLine<T extends Rect> {
     if (adsorbDistance < 1) return newDelta;
 
     const refLineMetaList = getRectRefLines(rect);
+    const lineStatus = [
+      this.isEnableLine(refLineMetaList[0]),
+      this.isEnableLine(refLineMetaList[1]),
+      this.isEnableLine(refLineMetaList[2]),
+      this.isEnableLine(refLineMetaList[3]),
+      this.isEnableLine(refLineMetaList[4]),
+      this.isEnableLine(refLineMetaList[5]),
+    ];
 
     const hasMatchedVRefLine =
       this.hasMatchedRefLine("vl") || this.hasMatchedRefLine("vc") || this.hasMatchedRefLine("vr");
@@ -411,15 +460,15 @@ export class RefLine<T extends Rect> {
       const values: number[] = [Infinity, Infinity, Infinity];
       const distValues: number[] = [Infinity, Infinity, Infinity];
       const useIndex = isMoveLeft ? 0 : 1;
-      if (n1[useIndex]) {
+      if (lineStatus[0] && n1[useIndex]) {
         values[0] = n1[useIndex]![0];
         distValues[0] = n1[useIndex]![1];
       }
-      if (n2[useIndex]) {
+      if (lineStatus[1] && n2[useIndex]) {
         values[1] = n2[useIndex]![0];
         distValues[1] = n2[useIndex]![1];
       }
-      if (n3[useIndex]) {
+      if (lineStatus[2] && n3[useIndex]) {
         values[2] = n3[useIndex]![0];
         distValues[2] = n3[useIndex]![1];
       }
@@ -464,15 +513,15 @@ export class RefLine<T extends Rect> {
       const values: number[] = [Infinity, Infinity, Infinity];
       const distValues: number[] = [Infinity, Infinity, Infinity];
       const useIndex = isMoveTop ? 0 : 1;
-      if (n1[useIndex]) {
+      if (lineStatus[3] && n1[useIndex]) {
         values[0] = n1[useIndex]![0];
         distValues[0] = n1[useIndex]![1];
       }
-      if (n2[useIndex]) {
+      if (lineStatus[4] && n2[useIndex]) {
         values[1] = n2[useIndex]![0];
         distValues[1] = n2[useIndex]![1];
       }
-      if (n3[useIndex]) {
+      if (lineStatus[5] && n3[useIndex]) {
         values[2] = n3[useIndex]![0];
         distValues[2] = n3[useIndex]![1];
       }
@@ -504,6 +553,90 @@ export class RefLine<T extends Rect> {
 
     return newDelta;
   }
+
+  adsorbCreator({
+    pageX,
+    pageY,
+    current = this.getCurrent(),
+    distance = 5,
+  }: {
+    pageX: number;
+    pageY: number;
+    current?: T;
+    distance?: number;
+  }) {
+    let currentRect: T = {
+      ...current,
+    };
+    const startX = pageX;
+    const startY = pageY;
+    const startLeft = currentRect.left;
+    const startTop = currentRect.top;
+
+    return (data: { pageX?: number; pageY?: number; current?: T; distance?: number }) => {
+      if (data.current) {
+        currentRect = {
+          ...data.current,
+        };
+      }
+
+      if (data.distance !== undefined) {
+        distance = data.distance;
+      }
+
+      const currentX = data.pageX === undefined ? startX : data.pageX;
+      const currentY = data.pageY === undefined ? startY : data.pageY;
+
+      const left = startLeft + currentX - startX;
+      const top = startTop + currentY - startY;
+
+      let delta = {
+        left: left - currentRect.left,
+        top: top - currentRect.top,
+      };
+
+      this.setCurrent(currentRect);
+      delta = this.getAdsorbDelta(delta, distance || 5);
+
+      currentRect.left += delta.left;
+      currentRect.top += delta.top;
+
+      return {
+        delta,
+        rect: {
+          ...currentRect,
+        },
+      };
+    };
+  }
+
+  // 添加吸附线
+  // 注：吸附线只针对吸附
+  addAdsorbLine(type: LineType, offset: number) {
+    const key = "adsorb_" + this.seq++;
+    this._adsorbLines.push({
+      key,
+      type,
+      offset,
+    });
+    this._dirty = true;
+
+    return key;
+  }
+
+  deleteAdsorbLine(key: string) {
+    this._adsorbLines = this._adsorbLines.filter(line => line.key !== key);
+    this._dirty = true;
+  }
+
+  cleanAdsorbLine() {
+    this._adsorbLines = [];
+    this._dirty = true;
+  }
+}
+
+export function createRefLine<T extends Rect = Rect>(opts: RefLineOpts<T>) {
+  return new RefLine(opts);
 }
 
 export default RefLine;

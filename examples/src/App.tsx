@@ -61,12 +61,22 @@ class App extends React.Component {
 
     const refline = new RefLine({
       rects: nodes,
+      lineFilter: line => {
+        if (line.position === "hc" || line.position === "vc") return false;
+        return true;
+      },
+    });
+
+    const updater = refline.adsorbCreator({
+      current: node,
+      pageX: startX,
+      pageY: startY,
+      distance: 10,
     });
 
     const un1 = listen(window as any, "mousemove", e => {
       const currentX = e.pageX;
       const currentY = e.pageY;
-
       const leftOffset = currentX - startX;
       const topOffset = currentY - startY;
 
@@ -84,8 +94,12 @@ class App extends React.Component {
 
       // 参考线吸附逻辑
       if (checked) {
-        refline.setCurrent(node!);
-        delta = refline.getAdsorbDelta(delta, 5);
+        const ret = updater({
+          pageX: currentX,
+          pageY: currentY,
+        });
+
+        delta = ret.delta;
       }
 
       node.left += delta.left;
