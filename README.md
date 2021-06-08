@@ -1,6 +1,6 @@
 # refline.js
 
-辅助参考线组件
+refline.js是完全不依赖设计器环境的参考线组件，方便各种设计器快速接入，支持参考线匹配及吸附功能。
 ## Install 
 
 ```cli
@@ -226,3 +226,5 @@ declare enum MOVE_DIR {
 
 
 ```
+
+文档及示例完善中...
