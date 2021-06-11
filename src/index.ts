@@ -562,9 +562,13 @@ export class RefLine<T extends Rect = Rect> {
   }: {
     pageX: number;
     pageY: number;
-    current?: T;
+    current?: T | null;
     distance?: number;
   }) {
+    if (!current) {
+      throw new Error("[refline.js] current rect does not exist!");
+    }
+
     let currentRect: T = {
       ...current,
     };
@@ -611,7 +615,6 @@ export class RefLine<T extends Rect = Rect> {
   }
 
   // 添加吸附线
-  // 注：吸附线只针对吸附
   addAdsorbLine(type: LineType, offset: number) {
     const key = "adsorb_" + this.seq++;
     this._adsorbLines.push({
