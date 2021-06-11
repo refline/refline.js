@@ -43,6 +43,8 @@ interface RefLineOpts<T extends Rect> {
     rects: T[];
     // 当前检查的矩形，可通过setCurrent改变
     current?: T | string;
+    // 参考线过滤，默认提供6条参考线(水平、垂直)，可通过该参数过滤不需要的参考线
+    lineFilter?: (line: RefLineMeta) => boolean;
 }
 ```
 
@@ -64,6 +66,10 @@ refLine.setCurrent({
 refLine.getVRefLines()
 
 ```
+
+### setLineFilter(filter)
+
+更新`lineFilter`
 
 ### getVRefLines(): MatchedLine[]
 
@@ -96,9 +102,54 @@ interface MatchedLine{
 
 给定当前的偏移量进行吸附偏移量计算，如果有吸附返回一个新的偏移量，如果无吸附则返回当前偏移量。
 
-### adsorbCreator()
+### adsorbCreator(IOpts): Updater
 
 根据给定坐标，创建吸附偏移量生成器，将新坐标传进生成器后可获得计算后的偏移量
+
+```ts
+interface IOpts{
+  pageX: number;
+  pageY: number;
+  current?: Rect;
+  distance?: number;
+}
+
+type Updater = (data: {
+    pageX?: number;
+    pageY?: number;
+    current?: Rect;
+    distance?: number;
+}) => {
+    delta: {
+        left: number;
+        top: number;
+    };
+    rect: Rect;
+}
+```
+
+使用示例：
+
+```ts
+
+const refLine = new RefLine({...})
+
+const updater = refLine.adsorbCreator({
+  current: rect,
+  pageX: 100,
+  pageY: 100,
+  distance: 5
+})
+
+const ret = updater({
+  pageX: 105,
+  pageY: 200
+})
+
+rect.left += ret.delta.left
+rect.top += ret.delta.top
+
+```
 
 ## Demo
 
@@ -106,11 +157,12 @@ interface MatchedLine{
 ## Types
 
 ```ts
-interface RefLineOpts<T extends Rect> {
+interface RefLineOpts<T extends Rect = Rect> {
     rects: T[];
     current?: T | string;
+    lineFilter?: (line: RefLineMeta) => boolean;
 }
-declare class RefLine<T extends Rect> {
+declare class RefLine<T extends Rect = Rect> {
     protected __rects: T[];
     protected _rects: T[];
     protected current: null | T;
@@ -119,6 +171,8 @@ declare class RefLine<T extends Rect> {
     protected _hLines: LineGroup<T>[];
     protected _vLineMap: Map<string, RefLineMeta<T>[]>;
     protected _hLineMap: Map<string, RefLineMeta<T>[]>;
+    protected _adsorbLines: AdsorbLine[];
+    protected _lineFilter: ((line: RefLineMeta) => boolean) | null;
     get rects(): T[];
     get vLines(): LineGroup<T>[];
     get hLines(): LineGroup<T>[];
@@ -131,8 +185,12 @@ declare class RefLine<T extends Rect> {
     protected getRect(rect: T | string): T | null;
     setCurrent(current: T | string | null): void;
     getCurrent(): T | null;
+    setLineFilter(filter: ((line: RefLineMeta) => boolean) | null): void;
+    getLineFilter(): ((line: RefLineMeta<Rect>) => boolean) | null;
     protected toLineMapKey<S>(v: S): string;
     protected getLineMapKey(line: RefLineMeta<T>): string;
+    protected isEnableLine(line: RefLineMeta<T>): boolean;
+    protected getRectRefLines(rect: T): RefLineMeta<T>[];
     protected initRefLines(): void;
     /**
      * 匹配参考线
@@ -168,7 +226,25 @@ declare class RefLine<T extends Rect> {
      * @returns
      */
     getAdsorbDelta(delta: Delta, adsorbDistance?: number): Delta;
+    adsorbCreator({ pageX, pageY, current, distance, }: {
+        pageX: number;
+        pageY: number;
+        current?: T | null;
+        distance?: number;
+    }): (data: {
+        pageX?: number;
+        pageY?: number;
+        current?: T;
+        distance?: number;
+    }) => {
+        delta: {
+            left: number;
+            top: number;
+        };
+        rect: T;
+    };
 }
+declare function createRefLine<T extends Rect = Rect>(opts: RefLineOpts<T>): RefLine<T>;
 
 interface Rect {
     key: string | number;
