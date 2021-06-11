@@ -31,6 +31,10 @@ const refLine = new RefLine({
 
 ```
 
+## createRefLine(opts: RefLineOpts): RefLine
+
+创建 `RefLine` 实例
+
 ## RefLine
 
 ### constructor(opts: RefLineOpts)
