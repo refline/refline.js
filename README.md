@@ -116,6 +116,8 @@ interface IOpts{
   pageY: number;
   current?: Rect;
   distance?: number;
+  // 禁用吸附计算
+  disableAdsorb?: boolean;
 }
 
 type Updater = (data: {
@@ -123,7 +125,15 @@ type Updater = (data: {
     pageY?: number;
     current?: Rect;
     distance?: number;
+    // 禁用吸附计算
+    disableAdsorb?: boolean;
 }) => {
+    // 原始偏移量
+    raw: {
+        left: number;
+        top: number;
+    };
+    // 吸附偏移量
     delta: {
         left: number;
         top: number;
@@ -235,12 +245,18 @@ declare class RefLine<T extends Rect = Rect> {
         pageY: number;
         current?: T | null;
         distance?: number;
+        disableAdsorb?: boolean
     }): (data: {
         pageX?: number;
         pageY?: number;
         current?: T;
         distance?: number;
+        disableAdsorb?: boolean
     }) => {
+        raw: {
+            left: number;
+            top: number;
+        };
         delta: {
             left: number;
             top: number;
