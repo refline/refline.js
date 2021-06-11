@@ -559,11 +559,13 @@ export class RefLine<T extends Rect = Rect> {
     pageY,
     current = this.getCurrent(),
     distance = 5,
+    disableAdsorb = false,
   }: {
     pageX: number;
     pageY: number;
     current?: T | null;
     distance?: number;
+    disableAdsorb?: boolean;
   }) {
     if (!current) {
       throw new Error("[refline.js] current rect does not exist!");
@@ -577,7 +579,13 @@ export class RefLine<T extends Rect = Rect> {
     const startLeft = currentRect.left;
     const startTop = currentRect.top;
 
-    return (data: { pageX?: number; pageY?: number; current?: T; distance?: number }) => {
+    return (data: {
+      pageX?: number;
+      pageY?: number;
+      current?: T;
+      distance?: number;
+      disableAdsorb?: boolean;
+    }) => {
       if (data.current) {
         currentRect = {
           ...data.current,
@@ -586,6 +594,10 @@ export class RefLine<T extends Rect = Rect> {
 
       if (data.distance !== undefined) {
         distance = data.distance;
+      }
+
+      if (data.disableAdsorb !== undefined) {
+        disableAdsorb = data.disableAdsorb;
       }
 
       const currentX = data.pageX === undefined ? startX : data.pageX;
@@ -599,13 +611,18 @@ export class RefLine<T extends Rect = Rect> {
         top: top - currentRect.top,
       };
 
-      this.setCurrent(currentRect);
-      delta = this.getAdsorbDelta(delta, distance || 5);
+      const raw = delta;
+
+      if (!disableAdsorb) {
+        this.setCurrent(currentRect);
+        delta = this.getAdsorbDelta(delta, distance || 5);
+      }
 
       currentRect.left += delta.left;
       currentRect.top += delta.top;
 
       return {
+        raw,
         delta,
         rect: {
           ...currentRect,
