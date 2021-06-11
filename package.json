@@ -1,6 +1,6 @@
 {
   "name": "refline.js",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
