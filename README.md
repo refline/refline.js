@@ -3,13 +3,17 @@
 refline.js是完全不依赖设计器环境的参考线组件，方便各种设计器快速接入，支持参考线匹配及吸附功能。
 
 ![refline.js](https://oscimg.oschina.net/oscnet/up-7ecfc44ff4bf6ce3497f69ea4a20fc2fd48.gif)
-## Install 
+
+## 示例
+
+[![Edit refline.js](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/reflinejs-7xnsd?fontsize=14&hidenavigation=1&theme=dark)
+## 安装 
 
 ```cli
 npm install refline.js
 ```
 
-## Usage
+## 使用
 
 ```ts
 import { RefLine } from 'refline.js'
@@ -31,7 +35,26 @@ const refLine = new RefLine({
   }
 })
 
+// 匹配参考线
+const lines = refLine.getAllRefLines()
+
+// 拖拽下参考线吸附
+// mousedown
+const updater = refLine.adsorbCreator({
+  pageX: 100,
+  pageY: 100,
+})
+// mousemove
+const {delta} = updater({
+  pageX: 108,
+  pageY: 110,
+})
+
+// TODO.
+
 ```
+
+---
 
 ## createRefLine(opts: RefLineOpts): RefLine
 
@@ -167,9 +190,6 @@ rect.top += ret.delta.top
 
 ```
 
-## Demo
-
-[![Edit refline.js](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/reflinejs-7xnsd?fontsize=14&hidenavigation=1&theme=dark)
 ## Types
 
 ```ts
