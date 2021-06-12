@@ -1,6 +1,8 @@
 # refline.js
 
 refline.js是完全不依赖设计器环境的参考线组件，方便各种设计器快速接入，支持参考线匹配及吸附功能。
+
+![refline.js](https://oscimg.oschina.net/oscnet/up-7ecfc44ff4bf6ce3497f69ea4a20fc2fd48.gif)
 ## Install 
 
 ```cli
