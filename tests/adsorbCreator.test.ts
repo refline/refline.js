@@ -189,4 +189,69 @@ describe("test adsorbCreator", () => {
       },
     });
   });
+
+  test("basic disable adsorb", () => {
+    const rect1 = {
+      key: "a",
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+    };
+
+    const rect2 = {
+      key: "b",
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+    };
+
+    const refLine = createRefLine({
+      rects: [rect1],
+    });
+
+    const updater = refLine.adsorbCreator({
+      current: rect2,
+      pageX: 0,
+      pageY: 0,
+      distance: 5,
+      disableAdsorb: true,
+    });
+
+    expect(
+      updater({
+        current: rect2,
+        pageX: 3,
+        pageY: 3,
+      })
+    ).toMatchObject({
+      delta: {
+        left: 3,
+        top: 3,
+      },
+      rect: {
+        left: 3,
+        top: 3,
+      },
+    });
+
+    expect(
+      updater({
+        current: rect2,
+        pageX: 3,
+        pageY: 3,
+        disableAdsorb: false,
+      })
+    ).toMatchObject({
+      delta: {
+        left: 0,
+        top: 0,
+      },
+      rect: {
+        left: 0,
+        top: 0,
+      },
+    });
+  });
 });
