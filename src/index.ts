@@ -60,6 +60,12 @@ export class RefLine<T extends Rect = Rect> {
     return this._rects;
   }
 
+  set rects(rects: T[]) {
+    this.__rects = rects;
+
+    this._dirty = true;
+  }
+
   get vLines() {
     if (this._dirty) {
       this.initRefLines();
@@ -138,6 +144,10 @@ export class RefLine<T extends Rect = Rect> {
     return lineMap.get(this.toLineMapKey(offset)) || [];
   }
 
+  /**
+   * @deprecated
+   * @param rects
+   */
   setRects(rects: T[]) {
     this.__rects = rects;
     this._dirty = true;
