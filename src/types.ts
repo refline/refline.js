@@ -31,6 +31,7 @@ export interface RefLineMeta<T extends Rect = Rect> {
   start: number;
   end: number;
   rect: T;
+  adsorbOnly?: boolean;
 }
 
 export interface MatchedLine<T extends Rect = Rect> {

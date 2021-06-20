@@ -29,6 +29,10 @@ export interface RefLineOpts<T extends Rect = Rect> {
   rects: T[];
   current?: T | string;
   lineFilter?: (line: RefLineMeta) => boolean;
+  // 垂直吸附线
+  adsorbVLines?: Omit<AdsorbLine, "type">[];
+  // 水平吸附线
+  adsorbHLines?: Omit<AdsorbLine, "type">[];
 }
 export class RefLine<T extends Rect = Rect> {
   protected opts: Omit<RefLineOpts<T>, "rects" | "current"> = {};
@@ -44,7 +48,8 @@ export class RefLine<T extends Rect = Rect> {
   protected _vLineMap: Map<string, RefLineMeta<T>[]> = new Map();
   protected _hLineMap: Map<string, RefLineMeta<T>[]> = new Map();
   // 自定义吸附线
-  protected _adsorbLines: AdsorbLine[] = [];
+  protected _adsorbVLines: Omit<AdsorbLine, "type">[] = [];
+  protected _adsorbHLines: Omit<AdsorbLine, "type">[] = [];
   protected _lineFilter: ((line: RefLineMeta) => boolean) | null = null;
 
   get rects() {
@@ -87,10 +92,33 @@ export class RefLine<T extends Rect = Rect> {
     return this._hLineMap;
   }
 
+  get adsorbVLines() {
+    return this._adsorbHLines;
+  }
+
+  set adsorbVLines(lines: Omit<AdsorbLine, "type">[]) {
+    this._adsorbVLines = lines;
+
+    this._dirty = true;
+  }
+
+  get adsorbHLines() {
+    return this._adsorbHLines;
+  }
+
+  set adsorbHLines(lines: Omit<AdsorbLine, "type">[]) {
+    this._adsorbHLines = lines;
+
+    this._dirty = true;
+  }
+
   constructor(opts?: RefLineOpts<T>) {
     this.opts = opts || {};
     this.__rects = opts?.rects || [];
     this._lineFilter = opts?.lineFilter || null;
+
+    this._adsorbVLines = opts?.adsorbVLines || [];
+    this._adsorbHLines = opts?.adsorbHLines || [];
 
     if (opts?.current) {
       this.setCurrent(opts.current);
@@ -152,11 +180,14 @@ export class RefLine<T extends Rect = Rect> {
     return v + "";
   }
 
-  protected getLineMapKey(line: RefLineMeta<T>) {
+  protected getLineMapKey(line: { offset: number }) {
     return this.toLineMapKey(fixNumber(line.offset, 0));
   }
 
   protected isEnableLine(line: RefLineMeta<T>) {
+    // 自定义吸附线不参与过滤
+    if (line.adsorbOnly) return true;
+
     const filter = this.getLineFilter();
     if (filter) {
       return filter(line);
@@ -206,6 +237,56 @@ export class RefLine<T extends Rect = Rect> {
       });
     });
 
+    // 添加自定义吸附线
+    this._adsorbVLines.forEach(line => {
+      const refLineMeta: RefLineMeta<T> = {
+        type: "vertical",
+        position: "vl",
+        offset: line.offset,
+        start: line.offset,
+        end: 0,
+        rect: {
+          key: "v_" + line.key,
+          width: 0,
+          height: 0,
+          left: line.offset,
+          top: 0,
+        } as T,
+        adsorbOnly: true,
+      };
+      vLines.push(refLineMeta);
+
+      const mKey = this.getLineMapKey(line);
+      const matched: RefLineMeta<T>[] = this._vLineMap.get(mKey) || [];
+      matched.push(refLineMeta);
+
+      this._vLineMap.set(mKey, matched);
+    });
+    this._adsorbHLines.forEach(line => {
+      const refLineMeta: RefLineMeta<T> = {
+        type: "horizontal",
+        position: "ht",
+        offset: line.offset,
+        start: line.offset,
+        end: 0,
+        rect: {
+          key: "h_" + line.key,
+          width: 0,
+          height: 0,
+          left: 0,
+          top: line.offset,
+        } as T,
+        adsorbOnly: true,
+      };
+      hLines.push(refLineMeta);
+
+      const mKey = this.getLineMapKey(line);
+      const matched: RefLineMeta<T>[] = this._hLineMap.get(mKey) || [];
+      matched.push(refLineMeta);
+
+      this._hLineMap.set(mKey, matched);
+    });
+
     vLines = vLines.sort((a, b) => a.offset - b.offset);
     hLines = hLines.sort((a, b) => a.offset - b.offset);
 
@@ -236,7 +317,7 @@ export class RefLine<T extends Rect = Rect> {
   }
 
   /**
-   * 匹配参考线
+   * 匹配参考线，主要用于显示，不包括自定义吸附线
    * @param type
    * @param rect
    * @returns
@@ -259,7 +340,12 @@ export class RefLine<T extends Rect = Rect> {
 
       const mKey = this.getLineMapKey(line);
 
-      const matchedLine = getMatchedLine(line, lineMap.get(mKey) || []);
+      const lines = lineMap.get(mKey) || [];
+
+      const matchedLine = getMatchedLine(
+        line,
+        lines.filter(line => !line.adsorbOnly) // 过滤自定义吸附线
+      );
 
       if (matchedLine) {
         matchedLines.push(matchedLine);
@@ -304,7 +390,11 @@ export class RefLine<T extends Rect = Rect> {
       next !== Infinity ? [next, nextDist] : null,
     ];
   }
-
+  /**
+   * 指定当前矩形需要检查的参考线，判断是否存在匹配，包括自定义吸附线
+   * @param position
+   * @returns
+   */
   hasMatchedRefLine(position: RefLinePosition) {
     const current = this.getCurrent();
     if (!current) return false;
@@ -632,27 +722,27 @@ export class RefLine<T extends Rect = Rect> {
   }
 
   // 添加吸附线
-  addAdsorbLine(type: LineType, offset: number) {
-    const key = "adsorb_" + this.seq++;
-    this._adsorbLines.push({
-      key,
-      type,
-      offset,
-    });
-    this._dirty = true;
+  // addAdsorbLine(type: LineType, offset: number) {
+  //   const key = "adsorb_" + this.seq++;
+  //   this._adsorbLines.push({
+  //     key,
+  //     type,
+  //     offset,
+  //   });
+  //   this._dirty = true;
 
-    return key;
-  }
+  //   return key;
+  // }
 
-  deleteAdsorbLine(key: string) {
-    this._adsorbLines = this._adsorbLines.filter(line => line.key !== key);
-    this._dirty = true;
-  }
+  // deleteAdsorbLine(key: string) {
+  //   this._adsorbLines = this._adsorbLines.filter(line => line.key !== key);
+  //   this._dirty = true;
+  // }
 
-  cleanAdsorbLine() {
-    this._adsorbLines = [];
-    this._dirty = true;
-  }
+  // cleanAdsorbLine() {
+  //   this._adsorbLines = [];
+  //   this._dirty = true;
+  // }
 }
 
 export function createRefLine<T extends Rect = Rect>(opts: RefLineOpts<T>) {
