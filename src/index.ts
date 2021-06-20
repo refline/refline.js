@@ -730,29 +730,6 @@ export class RefLine<T extends Rect = Rect> {
       };
     };
   }
-
-  // 添加吸附线
-  // addAdsorbLine(type: LineType, offset: number) {
-  //   const key = "adsorb_" + this.seq++;
-  //   this._adsorbLines.push({
-  //     key,
-  //     type,
-  //     offset,
-  //   });
-  //   this._dirty = true;
-
-  //   return key;
-  // }
-
-  // deleteAdsorbLine(key: string) {
-  //   this._adsorbLines = this._adsorbLines.filter(line => line.key !== key);
-  //   this._dirty = true;
-  // }
-
-  // cleanAdsorbLine() {
-  //   this._adsorbLines = [];
-  //   this._dirty = true;
-  // }
 }
 
 export function createRefLine<T extends Rect = Rect>(opts: RefLineOpts<T>) {
