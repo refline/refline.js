@@ -67,3 +67,6 @@ export interface AdsorbLine {
   type: LineType;
   offset: number;
 }
+
+export type AdsorbVLine = Omit<AdsorbLine, "type">;
+export type AdsorbHLine = Omit<AdsorbLine, "type">;

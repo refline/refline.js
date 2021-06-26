@@ -7,6 +7,8 @@ import {
   RefLinePosition,
   Delta,
   AdsorbLine,
+  AdsorbVLine,
+  AdsorbHLine,
 } from "./types";
 import {
   toNumber as fixNumber,
@@ -48,8 +50,8 @@ export class RefLine<T extends Rect = Rect> {
   protected _vLineMap: Map<string, RefLineMeta<T>[]> = new Map();
   protected _hLineMap: Map<string, RefLineMeta<T>[]> = new Map();
   // 自定义吸附线
-  protected _adsorbVLines: Omit<AdsorbLine, "type">[] = [];
-  protected _adsorbHLines: Omit<AdsorbLine, "type">[] = [];
+  protected _adsorbVLines: AdsorbVLine[] = [];
+  protected _adsorbHLines: AdsorbHLine[] = [];
   protected _lineFilter: ((line: RefLineMeta) => boolean) | null = null;
 
   get rects() {
@@ -102,7 +104,7 @@ export class RefLine<T extends Rect = Rect> {
     return this._adsorbHLines;
   }
 
-  set adsorbVLines(lines: Omit<AdsorbLine, "type">[]) {
+  set adsorbVLines(lines: AdsorbVLine[]) {
     this._adsorbVLines = lines;
 
     this._dirty = true;
@@ -112,7 +114,7 @@ export class RefLine<T extends Rect = Rect> {
     return this._adsorbHLines;
   }
 
-  set adsorbHLines(lines: Omit<AdsorbLine, "type">[]) {
+  set adsorbHLines(lines: AdsorbHLine[]) {
     this._adsorbHLines = lines;
 
     this._dirty = true;
