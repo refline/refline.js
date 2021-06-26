@@ -1,14 +1,13 @@
 {
   "name": "refline.js",
-  "version": "0.6.1",
-  "description": "",
+  "version": "0.7.0",
+  "description": "refline.js是完全不依赖设计器环境的参考线组件，方便各种设计器快速接入，支持参考线匹配及吸附功能。",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/lib/index.d.ts",
-  "dependencies": {
-    "@babel/runtime": "^7.12.5"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "@babel/runtime": "^7.12.5",
     "@types/jest": "^25.1.4",
     "babel-plugin-lodash": "^3.3.4",
     "babel-plugin-module-resolver": "^4.1.0",
