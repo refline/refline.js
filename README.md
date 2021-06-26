@@ -74,6 +74,10 @@ interface RefLineOpts<T extends Rect> {
     current?: T | string;
     // 参考线过滤，默认提供6条参考线(水平、垂直)，可通过该参数过滤不需要的参考线
     lineFilter?: (line: RefLineMeta) => boolean;
+    // 自定义垂直吸附线
+    adsorbVLines?: Array<{key: string; offset: number}>;
+    // 自定义水平吸附线
+    adsorbHLines?: Array<{key: string; offset: number}>;
 }
 ```
 
@@ -193,43 +197,33 @@ rect.top += ret.delta.top
 ## Types
 
 ```ts
-interface RefLineOpts<T extends Rect = Rect> {
+export interface RefLineOpts<T extends Rect = Rect> {
     rects: T[];
     current?: T | string;
     lineFilter?: (line: RefLineMeta) => boolean;
+    adsorbVLines?: Omit<AdsorbLine, "type">[];
+    adsorbHLines?: Omit<AdsorbLine, "type">[];
 }
-declare class RefLine<T extends Rect = Rect> {
-    protected __rects: T[];
-    protected _rects: T[];
-    protected current: null | T;
-    protected _dirty: boolean;
-    protected _vLines: LineGroup<T>[];
-    protected _hLines: LineGroup<T>[];
-    protected _vLineMap: Map<string, RefLineMeta<T>[]>;
-    protected _hLineMap: Map<string, RefLineMeta<T>[]>;
-    protected _adsorbLines: AdsorbLine[];
-    protected _lineFilter: ((line: RefLineMeta) => boolean) | null;
+export declare class RefLine<T extends Rect = Rect> {
     get rects(): T[];
+    set rects(rects: T[]);
     get vLines(): LineGroup<T>[];
     get hLines(): LineGroup<T>[];
     get vLineMap(): Map<string, RefLineMeta<T>[]>;
     get hLineMap(): Map<string, RefLineMeta<T>[]>;
+    get adsorbVLines(): AdsorbVLine[];
+    set adsorbVLines(lines: AdsorbVLine[]);
+    get adsorbHLines(): AdsorbHLine[];
+    set adsorbHLines(lines: AdsorbHLine[]);
     constructor(opts?: RefLineOpts<T>);
     getRectByKey(key: string | number): T | null;
     getOffsetRefLineMetaList(type: LineType, offset: number): RefLineMeta<T>[];
-    setRects(rects: T[]): void;
-    protected getRect(rect: T | string): T | null;
     setCurrent(current: T | string | null): void;
     getCurrent(): T | null;
     setLineFilter(filter: ((line: RefLineMeta) => boolean) | null): void;
     getLineFilter(): ((line: RefLineMeta<Rect>) => boolean) | null;
-    protected toLineMapKey<S>(v: S): string;
-    protected getLineMapKey(line: RefLineMeta<T>): string;
-    protected isEnableLine(line: RefLineMeta<T>): boolean;
-    protected getRectRefLines(rect: T): RefLineMeta<T>[];
-    protected initRefLines(): void;
     /**
-     * 匹配参考线
+     * 匹配参考线，主要用于显示，不包括自定义吸附线
      * @param type
      * @param rect
      * @returns
@@ -242,6 +236,11 @@ declare class RefLine<T extends Rect = Rect> {
      * @returns
      */
     getNearestOffsetFromOffset(type: LineType, offset: number): [[number, number] | null, [number, number] | null];
+    /**
+     * 指定当前矩形需要检查的参考线，判断是否存在匹配，包括自定义吸附线
+     * @param position
+     * @returns
+     */
     hasMatchedRefLine(position: RefLinePosition): boolean;
     getVRefLines(): MatchedLine<T>[];
     getHRefLines(): MatchedLine<T>[];
@@ -262,18 +261,18 @@ declare class RefLine<T extends Rect = Rect> {
      * @returns
      */
     getAdsorbDelta(delta: Delta, adsorbDistance?: number): Delta;
-    adsorbCreator({ pageX, pageY, current, distance, }: {
+    adsorbCreator({ pageX, pageY, current, distance, disableAdsorb, }: {
         pageX: number;
         pageY: number;
         current?: T | null;
         distance?: number;
-        disableAdsorb?: boolean
+        disableAdsorb?: boolean;
     }): (data: {
         pageX?: number;
         pageY?: number;
         current?: T;
         distance?: number;
-        disableAdsorb?: boolean
+        disableAdsorb?: boolean;
     }) => {
         raw: {
             left: number;
@@ -286,7 +285,8 @@ declare class RefLine<T extends Rect = Rect> {
         rect: T;
     };
 }
-declare function createRefLine<T extends Rect = Rect>(opts: RefLineOpts<T>): RefLine<T>;
+export declare function createRefLine<T extends Rect = Rect>(opts: RefLineOpts<T>): RefLine<T>;
+export default RefLine;
 
 interface Rect {
     key: string | number;
@@ -341,6 +341,13 @@ declare enum MOVE_DIR {
     MOVE_LEFT = 3,
     NONE = 4
 }
+export interface AdsorbLine {
+    key: string;
+    type: LineType;
+    offset: number;
+}
+export declare type AdsorbVLine = Omit<AdsorbLine, "type">;
+export declare type AdsorbHLine = Omit<AdsorbLine, "type">;
 
 
 ```
