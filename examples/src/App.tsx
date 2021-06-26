@@ -6,6 +6,19 @@ import { RefLine } from "../../src";
 import { listen } from "dom-helpers";
 import withHooks from "with-component-hooks";
 import RefLineDemo from "./RefLine";
+
+const adsorbHLines = [
+  {
+    key: "a",
+    offset: 100,
+  },
+  {
+    key: "b",
+    offset: 400,
+  },
+];
+const adsorbVLines = adsorbHLines;
+
 class App extends React.Component {
   state = {
     checked: true,
@@ -61,6 +74,8 @@ class App extends React.Component {
 
     const refline = new RefLine({
       rects: nodes,
+      adsorbHLines,
+      adsorbVLines,
       lineFilter: line => {
         if (line.position === "hc" || line.position === "vc") return false;
         return true;
@@ -148,6 +163,38 @@ class App extends React.Component {
             ({delta.left},{delta.top})
           </div>
           <Background />
+          {adsorbHLines.map(line => {
+            return (
+              <div
+                data-type="h"
+                key={line.key}
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  top: line.offset,
+                  right: 0,
+                  height: 1,
+                  background: "red",
+                }}
+              ></div>
+            );
+          })}
+          {adsorbVLines.map(line => {
+            return (
+              <div
+                data-type="v"
+                key={line.key}
+                style={{
+                  position: "absolute",
+                  left: line.offset,
+                  bottom: 0,
+                  top: 0,
+                  width: 1,
+                  background: "red",
+                }}
+              ></div>
+            );
+          })}
           {nodes.map(node => {
             return (
               <div
