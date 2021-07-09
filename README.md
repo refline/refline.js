@@ -147,6 +147,8 @@ interface IOpts{
   distance?: number;
   // 禁用吸附计算
   disableAdsorb?: boolean;
+  // 当前视图缩放比例，默认为：1
+  scale?: number;
 }
 
 type Updater = (data: {
@@ -156,6 +158,11 @@ type Updater = (data: {
     distance?: number;
     // 禁用吸附计算
     disableAdsorb?: boolean;
+    // 更新当前视图缩放比例，默认为：1
+    scale?: number;
+    // 自定义偏移量时，相应的pageX或pageY及scale会失效
+    deltaX?: number;
+    deltaY?: number;
 }) => {
     // 原始偏移量
     raw: {
@@ -181,7 +188,8 @@ const updater = refLine.adsorbCreator({
   current: rect,
   pageX: 100,
   pageY: 100,
-  distance: 5
+  distance: 5,
+  scale: 1
 })
 
 const ret = updater({
@@ -267,12 +275,17 @@ export declare class RefLine<T extends Rect = Rect> {
         current?: T | null;
         distance?: number;
         disableAdsorb?: boolean;
+        scale?: number;
     }): (data: {
         pageX?: number;
         pageY?: number;
         current?: T;
         distance?: number;
         disableAdsorb?: boolean;
+        scale?: number;
+        // 自定义偏移量时，相应的pageX或pageY及scale会失效
+        deltaX?: number;
+        deltaY?: number;
     }) => {
         raw: {
             left: number;
