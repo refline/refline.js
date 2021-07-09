@@ -1,6 +1,6 @@
 {
   "name": "refline.js",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "refline.js是完全不依赖设计器环境的参考线组件，方便各种设计器快速接入，支持参考线匹配及吸附功能。",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
