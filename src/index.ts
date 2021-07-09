@@ -662,12 +662,14 @@ export class RefLine<T extends Rect = Rect> {
     current = this.getCurrent(),
     distance = 5,
     disableAdsorb = false,
+    scale,
   }: {
     pageX: number;
     pageY: number;
     current?: T | null;
     distance?: number;
     disableAdsorb?: boolean;
+    scale?: number;
   }) {
     if (!current) {
       throw new Error("[refline.js] current rect does not exist!");
@@ -680,6 +682,7 @@ export class RefLine<T extends Rect = Rect> {
     const startY = pageY;
     const startLeft = currentRect.left;
     const startTop = currentRect.top;
+    const _scale = scale || 1;
 
     return (data: {
       pageX?: number;
@@ -687,6 +690,10 @@ export class RefLine<T extends Rect = Rect> {
       current?: T;
       distance?: number;
       disableAdsorb?: boolean;
+      scale?: number;
+      // 自定义偏移量时，相应的pageX或pageY及scale会失效
+      deltaX?: number;
+      deltaY?: number;
     }) => {
       if (data.current) {
         currentRect = {
@@ -704,9 +711,13 @@ export class RefLine<T extends Rect = Rect> {
 
       const currentX = data.pageX === undefined ? startX : data.pageX;
       const currentY = data.pageY === undefined ? startY : data.pageY;
+      const scale = data.scale === undefined ? _scale : data.scale;
 
-      const left = startLeft + currentX - startX;
-      const top = startTop + currentY - startY;
+      const deltaX = data.deltaX === undefined ? (currentX - startX) / scale : data.deltaX;
+      const deltaY = data.deltaY === undefined ? (currentY - startY) / scale : data.deltaY;
+
+      const left = startLeft + deltaX;
+      const top = startTop + deltaY;
 
       let delta = {
         left: left - currentRect.left,
