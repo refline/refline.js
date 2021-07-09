@@ -190,6 +190,198 @@ describe("test adsorbCreator", () => {
     });
   });
 
+  test("basic scale 0.5", () => {
+    const rect1 = {
+      key: "a",
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+    };
+
+    const rect2 = {
+      key: "b",
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+    };
+
+    const refLine = createRefLine({
+      rects: [rect1],
+    });
+
+    const scale = 0.5;
+
+    const updater = refLine.adsorbCreator({
+      current: rect2,
+      pageX: 0,
+      pageY: 0,
+      distance: 5,
+      scale,
+    });
+
+    expect(
+      updater({
+        pageX: 3 * scale,
+        pageY: 3 * scale,
+      })
+    ).toMatchObject({
+      delta: {
+        left: 0,
+        top: 0,
+      },
+      rect: {
+        left: 0,
+        top: 0,
+      },
+    });
+
+    expect(
+      updater({
+        pageX: 5 * scale,
+        pageY: 5 * scale,
+      })
+    ).toMatchObject({
+      delta: {
+        left: 0,
+        top: 0,
+      },
+      rect: {
+        left: 0,
+        top: 0,
+      },
+    });
+
+    expect(
+      updater({
+        pageX: 6 * scale,
+        pageY: 6 * scale,
+      })
+    ).toMatchObject({
+      delta: {
+        left: 6,
+        top: 6,
+      },
+      rect: {
+        left: 6,
+        top: 6,
+      },
+    });
+
+    expect(
+      updater({
+        pageX: 5 * scale,
+        pageY: 5 * scale,
+      })
+    ).toMatchObject({
+      delta: {
+        left: -6,
+        top: -6,
+      },
+      rect: {
+        left: 0,
+        top: 0,
+      },
+    });
+
+    expect(
+      updater({
+        pageX: 1 * scale,
+        pageY: 1 * scale,
+      })
+    ).toMatchObject({
+      delta: {
+        left: 0,
+        top: 0,
+      },
+      rect: {
+        left: 0,
+        top: 0,
+      },
+    });
+
+    expect(
+      updater({
+        pageX: -1 * scale,
+        pageY: -1 * scale,
+      })
+    ).toMatchObject({
+      delta: {
+        left: 0,
+        top: 0,
+      },
+      rect: {
+        left: 0,
+        top: 0,
+      },
+    });
+
+    expect(
+      updater({
+        pageX: -5 * scale,
+        pageY: -5 * scale,
+      })
+    ).toMatchObject({
+      delta: {
+        left: 0,
+        top: 0,
+      },
+      rect: {
+        left: 0,
+        top: 0,
+      },
+    });
+
+    expect(
+      updater({
+        pageX: -6 * scale,
+        pageY: -6 * scale,
+      })
+    ).toMatchObject({
+      delta: {
+        left: -6,
+        top: -6,
+      },
+      rect: {
+        left: -6,
+        top: -6,
+      },
+    });
+
+    expect(
+      updater({
+        pageX: -8 * scale,
+        pageY: -8 * scale,
+      })
+    ).toMatchObject({
+      delta: {
+        left: -2,
+        top: -2,
+      },
+      rect: {
+        left: -8,
+        top: -8,
+      },
+    });
+
+    expect(
+      updater({
+        pageX: 8 * scale,
+        pageY: 8 * scale,
+      })
+    ).toMatchObject({
+      delta: {
+        left: 16,
+        top: 16,
+      },
+      rect: {
+        left: 8,
+        top: 8,
+      },
+    });
+  });
+
   test("basic disable adsorb", () => {
     const rect1 = {
       key: "a",
