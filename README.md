@@ -151,6 +151,8 @@ interface IOpts{
   scale?: number;
 }
 
+**注:** `scale`的作用仅仅用于计算缩放后拖拽距离
+
 type Updater = (data: {
     pageX?: number;
     pageY?: number;
