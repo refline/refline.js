@@ -713,6 +713,7 @@ export class RefLine<T extends Rect = Rect> {
       const currentY = data.pageY === undefined ? startY : data.pageY;
       const scale = data.scale === undefined ? _scale : data.scale;
 
+      // TODO: 命名调整为 offsetX offsetY
       const deltaX = data.deltaX === undefined ? (currentX - startX) / scale : data.deltaX;
       const deltaY = data.deltaY === undefined ? (currentY - startY) / scale : data.deltaY;
 
@@ -737,6 +738,10 @@ export class RefLine<T extends Rect = Rect> {
       return {
         raw,
         delta,
+        offset: {
+          left: currentRect.left - startLeft,
+          top: currentRect.top - startTop,
+        },
         rect: {
           ...currentRect,
         },
