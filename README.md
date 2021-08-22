@@ -166,15 +166,20 @@ type Updater = (data: {
     deltaX?: number;
     deltaY?: number;
 }) => {
-    // 原始偏移量
+    // 拖动原始偏移量
     raw: {
-        left: number;
-        top: number;
+      left: number;
+      top: number;
     };
-    // 吸附偏移量
+    // 拖动时吸附产生的偏移量，无吸附的情况下delta和raw是相等的
     delta: {
-        left: number;
-        top: number;
+      left: number;
+      top: number;
+    };
+    // 相对初始pageX/pageY的偏移量
+    offset: {
+      left: number;
+      top: number;
     };
     rect: Rect;
 }
