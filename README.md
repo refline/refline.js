@@ -302,6 +302,10 @@ export declare class RefLine<T extends Rect = Rect> {
             left: number;
             top: number;
         };
+        offset: {
+            left: number;
+            top: number;
+        };
         rect: T;
     };
 }
