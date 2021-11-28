@@ -162,9 +162,9 @@ type Updater = (data: {
     disableAdsorb?: boolean;
     // 更新当前视图缩放比例，默认为：1
     scale?: number;
-    // 自定义偏移量时，相应的pageX或pageY及scale会失效
-    deltaX?: number;
-    deltaY?: number;
+    // 设置距离起始坐标偏移量，设置后相应的pageX或pageY及scale会失效
+    offsetX?: number;
+    offsetY?: number;
 }) => {
     // 拖动原始偏移量
     raw: {
@@ -290,9 +290,9 @@ export declare class RefLine<T extends Rect = Rect> {
         distance?: number;
         disableAdsorb?: boolean;
         scale?: number;
-        // 自定义偏移量时，相应的pageX或pageY及scale会失效
-        deltaX?: number;
-        deltaY?: number;
+        // 设置距离起始坐标偏移量，设置后相应的pageX或pageY及scale会失效
+        offsetX?: number;
+        offsetY?: number;
     }) => {
         raw: {
             left: number;
