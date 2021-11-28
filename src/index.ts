@@ -696,9 +696,9 @@ export class RefLine<T extends Rect = Rect> {
       distance?: number;
       disableAdsorb?: boolean;
       scale?: number;
-      // 自定义偏移量时，相应的pageX或pageY及scale会失效
-      deltaX?: number;
-      deltaY?: number;
+      // 设置距离起始坐标偏移量，设置后相应的pageX或pageY及scale会失效
+      offsetX?: number;
+      offsetY?: number;
     }) => {
       let disableAdsorb = defaultDisableAdsorb;
       if (data.current) {
@@ -719,12 +719,11 @@ export class RefLine<T extends Rect = Rect> {
       const currentY = data.pageY === undefined ? startY : data.pageY;
       const scale = data.scale === undefined ? _scale : data.scale;
 
-      // TODO: 命名调整为 offsetX offsetY
-      const deltaX = data.deltaX === undefined ? (currentX - startX) / scale : data.deltaX;
-      const deltaY = data.deltaY === undefined ? (currentY - startY) / scale : data.deltaY;
+      const offsetX = data.offsetX === undefined ? (currentX - startX) / scale : data.offsetX;
+      const offsetY = data.offsetY === undefined ? (currentY - startY) / scale : data.offsetY;
 
-      const left = startLeft + deltaX;
-      const top = startTop + deltaY;
+      const left = startLeft + offsetX;
+      const top = startTop + offsetY;
 
       let delta = {
         left: left - currentRect.left,
