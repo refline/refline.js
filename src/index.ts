@@ -683,6 +683,11 @@ export class RefLine<T extends Rect = Rect> {
     const startLeft = currentRect.left;
     const startTop = currentRect.top;
     const _scale = scale || 1;
+    const defaultDisableAdsorb = disableAdsorb;
+
+    // 记录上次坐标，如果相同则偏移量返回0，修复吸附后重复计算导致结果不一致问题
+    let lastX;
+    let lastY;
 
     return (data: {
       pageX?: number;
@@ -695,6 +700,7 @@ export class RefLine<T extends Rect = Rect> {
       deltaX?: number;
       deltaY?: number;
     }) => {
+      let disableAdsorb = defaultDisableAdsorb;
       if (data.current) {
         currentRect = {
           ...data.current,
@@ -725,6 +731,18 @@ export class RefLine<T extends Rect = Rect> {
         top: top - currentRect.top,
       };
 
+      if (currentX === lastX) {
+        delta.left = 0;
+      }
+
+      if (currentY === lastY) {
+        delta.top = 0;
+      }
+
+      if (currentX === lastX && currentY === lastY) {
+        disableAdsorb = true;
+      }
+
       const raw = delta;
 
       if (!disableAdsorb) {
@@ -734,6 +752,9 @@ export class RefLine<T extends Rect = Rect> {
 
       currentRect.left += delta.left;
       currentRect.top += delta.top;
+
+      lastX = currentX;
+      lastY = currentY;
 
       return {
         raw,
