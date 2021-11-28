@@ -798,4 +798,58 @@ describe("test adsorbCreator", () => {
       },
     });
   });
+
+  test("adsorb double-count", () => {
+    const rect1 = {
+      height: 218.99997003816793,
+      key: "a",
+      left: 68.7278,
+      rotate: 0,
+      top: 392.66171498091603,
+      width: 150.7963,
+    };
+
+    const rect2 = {
+      height: 203.999977245509,
+      key: "b",
+      left: 114.56103333333331,
+      rotate: 0,
+      top: 130.18114471057896,
+      width: 106.29640000000002,
+    };
+
+    const refLine = createRefLine({
+      rects: [rect1],
+    });
+
+    const updater = refLine.adsorbCreator({
+      current: rect2,
+      pageX: 727,
+      pageY: 245,
+      distance: 5,
+    });
+
+    updater({
+      pageX: 729,
+      pageY: 256,
+    });
+
+    const r1 = updater({
+      pageX: 728,
+      pageY: 256,
+    });
+
+    const r2 = updater({
+      pageX: 728,
+      pageY: 256,
+    });
+
+    expect(r1).toMatchObject({
+      delta: { left: -3.333333333333343, top: 0 },
+    });
+
+    expect(r2).toMatchObject({
+      delta: { left: 0, top: 0 },
+    });
+  });
 });
