@@ -852,4 +852,181 @@ describe("test adsorbCreator", () => {
       delta: { left: 0, top: 0 },
     });
   });
+
+  test("adsorb precision 01", () => {
+    const rect1 = {
+      height: 218.99997003816793,
+      key: "a",
+      left: 68.7278,
+      rotate: 0,
+      top: 392.66171498091603,
+      width: 150.7963,
+    };
+
+    const rect2 = {
+      height: 203.999977245509,
+      key: "b",
+      left: 113.22769999999997,
+      rotate: 0,
+      top: 157.86464561147974,
+      width: 106.29640000000002,
+    };
+
+    const refLine = createRefLine({
+      rects: [rect1],
+    });
+
+    const updater = refLine.adsorbCreator({
+      current: rect2,
+      pageX: 758,
+      pageY: 307,
+      distance: 5,
+      scale: 0.69375,
+    });
+
+    updater({
+      pageX: 750,
+      pageY: 312,
+    });
+
+    updater({
+      pageX: 751,
+      pageY: 312,
+    });
+
+    const r1 = updater({
+      pageX: 752,
+      pageY: 312,
+    });
+
+    const r2 = updater({
+      pageX: 753,
+      pageY: 312,
+    });
+
+    expect(r1).toMatchObject({
+      delta: { left: 1.441441441441441, top: 0 },
+    });
+
+    expect(r2).toMatchObject({
+      delta: { left: 1.441441441441441, top: 0 },
+    });
+
+    const r3 = updater({
+      pageX: 754,
+      pageY: 312,
+    });
+    expect(r3).toMatchObject({
+      delta: { left: 7.207207207207233, top: 0 },
+    });
+
+    const r4 = updater({
+      pageX: 755,
+      pageY: 312,
+    });
+    expect(r4).toMatchObject({
+      delta: { left: 0, top: 0 },
+    });
+
+    const r5 = updater({
+      pageX: 756,
+      pageY: 312,
+    });
+    expect(r5).toMatchObject({
+      delta: { left: 0, top: 0 },
+    });
+  });
+  test("adsorb precision 02", () => {
+    const rect1 = {
+      height: 218.99997003816793,
+      key: "a",
+      left: 68.7278,
+      rotate: 0,
+      top: 392.66171498091603,
+      width: 150.7963,
+    };
+
+    const rect2 = {
+      height: 203.999977245509,
+      key: "bba",
+      left: 90.97774999999999,
+      rotate: 0,
+      top: 185.94658848633475,
+      width: 106.29640000000002,
+    };
+
+    const refLine = createRefLine({
+      rects: [rect1],
+    });
+
+    const scale = 0.58625;
+
+    const updater = refLine.adsorbCreator({
+      current: rect2,
+      pageX: 794,
+      pageY: 276,
+      distance: 5,
+      scale,
+    });
+
+    updater({
+      pageX: 795,
+      pageY: 272,
+    });
+
+    updater({
+      pageX: 794,
+      pageY: 272,
+    });
+
+    const r1 = updater({
+      pageX: 794,
+      pageY: 271,
+    });
+
+    const r2 = updater({
+      pageX: 794,
+      pageY: 272,
+    });
+
+    expect(r1).toMatchObject({
+      delta: { left: 0, top: -1.7057569296375448 },
+    });
+
+    expect(r2).toMatchObject({
+      delta: { left: 0, top: 1.7057569296375448 },
+    });
+
+    const r3 = updater({
+      pageX: 794,
+      pageY: 273,
+    });
+    expect(r3).toMatchObject({
+      delta: { left: 0, top: 1.7057569296375164 },
+    });
+
+    const r4 = updater({
+      pageX: 794,
+      pageY: 274,
+    });
+    expect(r4).toMatchObject({
+      delta: { left: 0, top: 1.7057569296375164 },
+    });
+
+    const r5 = updater({
+      pageX: 794,
+      pageY: 275,
+    });
+    expect(r5).toMatchObject({
+      delta: { left: 0, top: 6.126663108347287 },
+    });
+
+    const r6 = updater({
+      pageX: 794,
+      pageY: 276,
+    });
+    expect(r6).toMatchObject({
+      delta: { left: 0, top: 0 },
+    });
+  });
 });
