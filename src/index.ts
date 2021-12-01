@@ -20,6 +20,7 @@ import {
   mergeRefLineMeta,
   getMatchedLine,
   coordinateRotation,
+  isUndef,
 } from "./utils";
 export const version = "%VERSION%";
 
@@ -386,14 +387,15 @@ export class RefLine<T extends Rect = Rect> {
     let nextDist: number = Infinity;
 
     lines.forEach(line => {
-      if (line.min < offset) {
+      const d = Math.abs(line.min - offset);
+      if (line.min < offset && d >= 0.5) {
         prev = Math.max(line.min, prev);
-        prevDist = Math.min(Math.abs(line.min - offset), prevDist);
+        prevDist = Math.min(d, prevDist);
       }
 
-      if (line.min > offset) {
+      if (line.min > offset && d >= 0.5) {
         next = Math.min(line.min, next);
-        nextDist = Math.min(Math.abs(line.min - offset), nextDist);
+        nextDist = Math.min(d, nextDist);
       }
     });
 
@@ -517,7 +519,14 @@ export class RefLine<T extends Rect = Rect> {
    * @param adsorbDistance
    * @returns
    */
-  getAdsorbDelta(delta: Delta, adsorbDistance = 5): Delta {
+  getAdsorbDelta(
+    delta: Delta,
+    adsorbDistance = 5,
+    dir?: {
+      x?: "left" | "right";
+      y?: "up" | "down";
+    }
+  ): Delta {
     const rect = this.getCurrent();
     if (!rect) return delta;
 
@@ -546,7 +555,7 @@ export class RefLine<T extends Rect = Rect> {
     const hasMatchedHRefLine =
       this.hasMatchedRefLine("ht") || this.hasMatchedRefLine("hc") || this.hasMatchedRefLine("hb");
 
-    {
+    if (delta.left !== 0) {
       adsorbDistance = origAdsorbDistance;
       const currentOffsetList = [
         refLineMetaList[0].offset,
@@ -557,7 +566,7 @@ export class RefLine<T extends Rect = Rect> {
       const n2 = this.getNearestOffsetFromOffset("vertical", refLineMetaList[1].offset);
       const n3 = this.getNearestOffsetFromOffset("vertical", refLineMetaList[2].offset);
 
-      const isMoveLeft = delta.left < 0;
+      const isMoveLeft = dir && dir.x ? dir.x === "left" : delta.left < 0;
 
       const values: number[] = [Infinity, Infinity, Infinity];
       const distValues: number[] = [Infinity, Infinity, Infinity];
@@ -599,7 +608,8 @@ export class RefLine<T extends Rect = Rect> {
         }
       }
     }
-    {
+
+    if (delta.top !== 0) {
       adsorbDistance = origAdsorbDistance;
       const currentOffsetList = [
         refLineMetaList[3].offset,
@@ -610,7 +620,7 @@ export class RefLine<T extends Rect = Rect> {
       const n2 = this.getNearestOffsetFromOffset("horizontal", refLineMetaList[4].offset);
       const n3 = this.getNearestOffsetFromOffset("horizontal", refLineMetaList[5].offset);
 
-      const isMoveTop = delta.top < 0;
+      const isMoveTop = dir && dir.y ? dir.y === "up" : delta.top < 0;
 
       const values: number[] = [Infinity, Infinity, Infinity];
       const distValues: number[] = [Infinity, Infinity, Infinity];
@@ -640,8 +650,8 @@ export class RefLine<T extends Rect = Rect> {
       if (hasMatchedHRefLine) {
         if (Math.abs(delta.top) < adsorbDistance) {
           newDelta.top = 0;
-        } else if (Math.abs(delta.left) === 1 && adsorbDistance < 1) {
-          newDelta.left = adsorbDistance;
+        } else if (Math.abs(delta.top) === 1 && adsorbDistance < 1) {
+          newDelta.top = adsorbDistance;
         }
       } else if (delta.top !== 0) {
         const currentOffset = currentOffsetList[minIndex];
@@ -686,8 +696,8 @@ export class RefLine<T extends Rect = Rect> {
     const defaultDisableAdsorb = disableAdsorb;
 
     // 记录上次坐标，如果相同则偏移量返回0，修复吸附后重复计算导致结果不一致问题
-    let lastX;
-    let lastY;
+    let lastX = pageX;
+    let lastY = pageY;
 
     return (data: {
       pageX?: number;
@@ -718,6 +728,16 @@ export class RefLine<T extends Rect = Rect> {
       const currentX = data.pageX === undefined ? startX : data.pageX;
       const currentY = data.pageY === undefined ? startY : data.pageY;
       const scale = data.scale === undefined ? _scale : data.scale;
+      const dir = {} as {
+        x?: "left" | "right";
+        y?: "up" | "down";
+      };
+      if (!isUndef(data.pageX)) {
+        dir.x = currentX <= lastX ? "left" : "right";
+      }
+      if (!isUndef(data.pageY)) {
+        dir.y = currentY <= lastY ? "up" : "down";
+      }
 
       const offsetX = data.offsetX === undefined ? (currentX - startX) / scale : data.offsetX;
       const offsetY = data.offsetY === undefined ? (currentY - startY) / scale : data.offsetY;
@@ -730,15 +750,20 @@ export class RefLine<T extends Rect = Rect> {
         top: top - currentRect.top,
       };
 
-      if (currentX === lastX) {
+      if (!isUndef(data.pageX) && currentX === lastX) {
         delta.left = 0;
       }
 
-      if (currentY === lastY) {
+      if (!isUndef(data.pageY) && currentY === lastY) {
         delta.top = 0;
       }
 
-      if (currentX === lastX && currentY === lastY) {
+      if (
+        !isUndef(data.pageX) &&
+        !isUndef(data.pageY) &&
+        currentX === lastX &&
+        currentY === lastY
+      ) {
         disableAdsorb = true;
       }
 
@@ -746,7 +771,7 @@ export class RefLine<T extends Rect = Rect> {
 
       if (!disableAdsorb) {
         this.setCurrent(currentRect);
-        delta = this.getAdsorbDelta(delta, distance || 5);
+        delta = this.getAdsorbDelta(delta, distance || 5, dir);
       }
 
       currentRect.left += delta.left;

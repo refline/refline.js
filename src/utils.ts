@@ -10,7 +10,7 @@ import {
 } from "./types";
 
 export function toNumber(v: number, numDigits = 0) {
-  return parseInt(v.toFixed(numDigits), 10);
+  return +v.toFixed(numDigits);
 }
 
 export function deg2rad(deg: number) {
@@ -294,4 +294,8 @@ export function getMatchedLine<T extends Rect>(
     start: isVertical ? boundingRect.top : boundingRect.left,
     end: isVertical ? boundingRect.bottom : boundingRect.right,
   });
+}
+
+export function isUndef(value: any) {
+  return value === undefined;
 }
