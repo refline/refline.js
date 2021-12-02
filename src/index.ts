@@ -698,6 +698,7 @@ export class RefLine<T extends Rect = Rect> {
     // 记录上次坐标，如果相同则偏移量返回0，修复吸附后重复计算导致结果不一致问题
     let lastX = pageX;
     let lastY = pageY;
+    let lastDirX, lastDirY;
 
     return (data: {
       pageX?: number;
@@ -732,12 +733,25 @@ export class RefLine<T extends Rect = Rect> {
         x?: "left" | "right";
         y?: "up" | "down";
       };
-      if (!isUndef(data.pageX)) {
-        dir.x = currentX <= lastX ? "left" : "right";
-      }
-      if (!isUndef(data.pageY)) {
-        dir.y = currentY <= lastY ? "up" : "down";
-      }
+      // 待定
+      // if (!isUndef(data.pageX)) {
+      //   if (currentX === lastX) {
+      //     dir.x = lastDirX;
+      //   } else {
+      //     dir.x = currentX < lastX ? "left" : "right";
+      //   }
+
+      //   lastDirX = dir.x;
+      // }
+      // if (!isUndef(data.pageY)) {
+      //   if (currentY === lastY) {
+      //     dir.y = lastDirY;
+      //   } else {
+      //     dir.y = currentY < lastY ? "up" : "down";
+      //   }
+
+      //   lastDirY = dir.y;
+      // }
 
       const offsetX = data.offsetX === undefined ? (currentX - startX) / scale : data.offsetX;
       const offsetY = data.offsetY === undefined ? (currentY - startY) / scale : data.offsetY;
