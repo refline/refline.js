@@ -33,15 +33,16 @@ class App extends React.Component {
           {
             key: "node1",
             left: 100,
-            top: 160,
-            width: 151,
+            top: 280,
+            width: 158,
             height: 65,
+            rotate: 0,
           },
           {
             key: "node2",
             left: 200,
-            top: 250,
-            width: 151,
+            top: 200,
+            width: 158,
             height: 65,
           },
           {
@@ -54,7 +55,7 @@ class App extends React.Component {
           {
             key: "node4",
             left: 50,
-            top: 50,
+            top: 100,
             width: 150,
             height: 65,
           },
