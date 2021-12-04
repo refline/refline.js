@@ -20,7 +20,7 @@ import {
   mergeRefLineMeta,
   getMatchedLine,
   coordinateRotation,
-  isUndef,
+  isNil,
 } from "./utils";
 export const version = "%VERSION%";
 
@@ -522,13 +522,16 @@ export class RefLine<T extends Rect = Rect> {
   getAdsorbDelta(
     delta: Delta,
     adsorbDistance = 5,
-    dir?: {
-      x?: "left" | "right";
-      y?: "up" | "down";
+    dir: {
+      x: "left" | "right" | "none";
+      y: "up" | "down" | "none";
     }
   ): Delta {
     const rect = this.getCurrent();
     if (!rect) return delta;
+
+    const dirX = dir?.x || "none";
+    const dirY = dir?.y || "none";
 
     adsorbDistance = Math.abs(adsorbDistance);
     const origAdsorbDistance = adsorbDistance;
@@ -555,7 +558,7 @@ export class RefLine<T extends Rect = Rect> {
     const hasMatchedHRefLine =
       this.hasMatchedRefLine("ht") || this.hasMatchedRefLine("hc") || this.hasMatchedRefLine("hb");
 
-    if (delta.left !== 0) {
+    if (delta.left !== 0 && dirX !== "none") {
       adsorbDistance = origAdsorbDistance;
       const currentOffsetList = [
         refLineMetaList[0].offset,
@@ -566,7 +569,7 @@ export class RefLine<T extends Rect = Rect> {
       const n2 = this.getNearestOffsetFromOffset("vertical", refLineMetaList[1].offset);
       const n3 = this.getNearestOffsetFromOffset("vertical", refLineMetaList[2].offset);
 
-      const isMoveLeft = dir && dir.x ? dir.x === "left" : delta.left < 0;
+      const isMoveLeft = dirX === "left";
 
       const values: number[] = [Infinity, Infinity, Infinity];
       const distValues: number[] = [Infinity, Infinity, Infinity];
@@ -594,12 +597,14 @@ export class RefLine<T extends Rect = Rect> {
       }
 
       if (hasMatchedVRefLine) {
-        if (Math.abs(delta.left) < adsorbDistance) {
+        if (isMoveLeft && delta.left > 0) {
           newDelta.left = 0;
-        } else if (Math.abs(delta.left) === 1 && adsorbDistance < 1) {
-          newDelta.left = adsorbDistance;
+        } else if (!isMoveLeft && delta.left < 0) {
+          newDelta.left = 0;
+        } else if (Math.abs(delta.left) < adsorbDistance) {
+          newDelta.left = 0;
         }
-      } else if (delta.left !== 0) {
+      } else {
         const currentOffset = currentOffsetList[minIndex];
         const dist = minOffset - (currentOffset + delta.left);
 
@@ -609,7 +614,7 @@ export class RefLine<T extends Rect = Rect> {
       }
     }
 
-    if (delta.top !== 0) {
+    if (delta.top !== 0 && dirY !== "none") {
       adsorbDistance = origAdsorbDistance;
       const currentOffsetList = [
         refLineMetaList[3].offset,
@@ -620,7 +625,7 @@ export class RefLine<T extends Rect = Rect> {
       const n2 = this.getNearestOffsetFromOffset("horizontal", refLineMetaList[4].offset);
       const n3 = this.getNearestOffsetFromOffset("horizontal", refLineMetaList[5].offset);
 
-      const isMoveTop = dir && dir.y ? dir.y === "up" : delta.top < 0;
+      const isMoveTop = dirY === "up";
 
       const values: number[] = [Infinity, Infinity, Infinity];
       const distValues: number[] = [Infinity, Infinity, Infinity];
@@ -648,12 +653,14 @@ export class RefLine<T extends Rect = Rect> {
       }
 
       if (hasMatchedHRefLine) {
-        if (Math.abs(delta.top) < adsorbDistance) {
+        if (isMoveTop && delta.top > 0) {
           newDelta.top = 0;
-        } else if (Math.abs(delta.top) === 1 && adsorbDistance < 1) {
-          newDelta.top = adsorbDistance;
+        } else if (!isMoveTop && delta.top < 0) {
+          newDelta.top = 0;
+        } else if (Math.abs(delta.top) < adsorbDistance) {
+          newDelta.top = 0;
         }
-      } else if (delta.top !== 0) {
+      } else {
         const currentOffset = currentOffsetList[minIndex];
         const dist = minOffset - (currentOffset + delta.top);
 
@@ -718,43 +725,46 @@ export class RefLine<T extends Rect = Rect> {
         };
       }
 
-      if (data.distance !== undefined) {
-        distance = data.distance;
+      if (!isNil(data.distance)) {
+        distance = data.distance as number;
       }
 
-      if (data.disableAdsorb !== undefined) {
-        disableAdsorb = data.disableAdsorb;
+      if (!isNil(data.disableAdsorb)) {
+        disableAdsorb = data.disableAdsorb as boolean;
       }
 
-      const currentX = data.pageX === undefined ? startX : data.pageX;
-      const currentY = data.pageY === undefined ? startY : data.pageY;
-      const scale = data.scale === undefined ? _scale : data.scale;
-      const dir = {} as {
-        x?: "left" | "right";
-        y?: "up" | "down";
+      const currentX = isNil(data.pageX) ? startX : (data.pageX as number);
+      const currentY = isNil(data.pageY) ? startY : (data.pageY as number);
+      const scale = isNil(data.scale) ? _scale : (data.scale as number);
+      const dir = {
+        x: "none",
+        y: "none",
+      } as {
+        x: "left" | "right" | "none";
+        y: "up" | "down" | "none";
       };
-      // 待定
-      // if (!isUndef(data.pageX)) {
-      //   if (currentX === lastX) {
-      //     dir.x = lastDirX;
-      //   } else {
-      //     dir.x = currentX < lastX ? "left" : "right";
-      //   }
 
-      //   lastDirX = dir.x;
-      // }
-      // if (!isUndef(data.pageY)) {
-      //   if (currentY === lastY) {
-      //     dir.y = lastDirY;
-      //   } else {
-      //     dir.y = currentY < lastY ? "up" : "down";
-      //   }
+      if (!isNil(data.pageX)) {
+        if (currentX === lastX) {
+          dir.x = lastDirX;
+        } else {
+          dir.x = currentX < lastX ? "left" : "right";
+        }
 
-      //   lastDirY = dir.y;
-      // }
+        lastDirX = dir.x;
+      }
+      if (!isNil(data.pageY)) {
+        if (currentY === lastY) {
+          dir.y = lastDirY;
+        } else {
+          dir.y = currentY < lastY ? "up" : "down";
+        }
 
-      const offsetX = data.offsetX === undefined ? (currentX - startX) / scale : data.offsetX;
-      const offsetY = data.offsetY === undefined ? (currentY - startY) / scale : data.offsetY;
+        lastDirY = dir.y;
+      }
+
+      const offsetX = isNil(data.offsetX) ? (currentX - startX) / scale : (data.offsetX as number);
+      const offsetY = isNil(data.offsetY) ? (currentY - startY) / scale : (data.offsetY as number);
 
       const left = startLeft + offsetX;
       const top = startTop + offsetY;
@@ -764,20 +774,15 @@ export class RefLine<T extends Rect = Rect> {
         top: top - currentRect.top,
       };
 
-      if (!isUndef(data.pageX) && currentX === lastX) {
+      if (!isNil(data.pageX) && currentX === lastX) {
         delta.left = 0;
       }
 
-      if (!isUndef(data.pageY) && currentY === lastY) {
+      if (!isNil(data.pageY) && currentY === lastY) {
         delta.top = 0;
       }
 
-      if (
-        !isUndef(data.pageX) &&
-        !isUndef(data.pageY) &&
-        currentX === lastX &&
-        currentY === lastY
-      ) {
+      if (!isNil(data.pageX) && !isNil(data.pageY) && currentX === lastX && currentY === lastY) {
         disableAdsorb = true;
       }
 

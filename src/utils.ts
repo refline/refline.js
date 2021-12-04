@@ -296,6 +296,6 @@ export function getMatchedLine<T extends Rect>(
   });
 }
 
-export function isUndef(value: any) {
-  return value === undefined;
+export function isNil<T>(value: T) {
+  return value == null;
 }
