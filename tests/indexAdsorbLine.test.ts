@@ -66,7 +66,11 @@ describe("test RefLine::Opts - adsorbVLines/adsorbHLines", () => {
           left: 8,
           top: 8,
         },
-        10
+        10,
+        {
+          x: "right",
+          y: "down",
+        }
       )
     ).toEqual({
       left: 0,
@@ -79,7 +83,11 @@ describe("test RefLine::Opts - adsorbVLines/adsorbHLines", () => {
           left: 18,
           top: 18,
         },
-        10
+        10,
+        {
+          x: "right",
+          y: "down",
+        }
       )
     ).toEqual({
       left: 18,
