@@ -521,7 +521,7 @@ export class RefLine<T extends Rect = Rect> {
    */
   getAdsorbDelta(
     delta: Delta,
-    adsorbDistance = 5,
+    adsorbDistance: number,
     dir: {
       x: "left" | "right" | "none";
       y: "up" | "down" | "none";
@@ -533,7 +533,7 @@ export class RefLine<T extends Rect = Rect> {
     const dirX = dir?.x || "none";
     const dirY = dir?.y || "none";
 
-    adsorbDistance = Math.abs(adsorbDistance);
+    adsorbDistance = Math.abs(adsorbDistance || 5);
     const origAdsorbDistance = adsorbDistance;
 
     const newDelta = {

@@ -271,11 +271,11 @@ export declare class RefLine<T extends Rect = Rect> {
     getOffsetAdsorbDelta(type: LineType, offset: number, delta: number, adsorbDistance?: number): number;
     /**
      * 适配偏移量，达到吸附效果
-     * @param delta
-     * @param adsorbDistance
-     * @returns
      */
-    getAdsorbDelta(delta: Delta, adsorbDistance?: number): Delta;
+    getAdsorbDelta(delta: Delta, adsorbDistance: number, dir: {
+        x: "left" | "right" | "none";
+        y: "up" | "down" | "none";
+    }): Delta;
     adsorbCreator({ pageX, pageY, current, distance, disableAdsorb, }: {
         pageX: number;
         pageY: number;
