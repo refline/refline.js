@@ -50,6 +50,7 @@ body {
   
 }
 
+/**
 .node::after{
   content: "";
   position: absolute;
@@ -69,7 +70,7 @@ body {
   top: 50%;
   transform: translateY(-50%);
 }
-
+*/
 
 .line {
   position: absolute;

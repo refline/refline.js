@@ -11,10 +11,10 @@ export default function Refline({ nodes, current }: Props) {
   const refline = new RefLine({
     rects: nodes,
     current,
-    lineFilter: line => {
-      if (line.position === "hc" || line.position === "vc") return false;
-      return true;
-    },
+    // lineFilter: line => {
+    //   if (line.position === "hc" || line.position === "vc") return false;
+    //   return true;
+    // },
   });
 
   const lines = refline.getAllRefLines();

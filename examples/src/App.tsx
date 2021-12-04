@@ -79,10 +79,10 @@ class App extends React.Component {
       rects: nodes,
       adsorbHLines,
       adsorbVLines,
-      lineFilter: line => {
-        if (line.position === "hc" || line.position === "vc") return false;
-        return true;
-      },
+      // lineFilter: line => {
+      //   if (line.position === "hc" || line.position === "vc") return false;
+      //   return true;
+      // },
     });
 
     const updater = refline.adsorbCreator({
