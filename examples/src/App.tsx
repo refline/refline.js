@@ -1,12 +1,12 @@
 import "./styles.css";
 import React from "react";
 import Background from "./Background";
-import { find } from "lodash";
+import { find, random } from "lodash";
 import { RefLine } from "../../src";
 import { listen } from "dom-helpers";
 import withHooks from "with-component-hooks";
 import RefLineDemo from "./RefLine";
-
+let seq = 100;
 const adsorbHLines = [
   {
     key: "a",
@@ -19,6 +19,38 @@ const adsorbHLines = [
 ];
 const adsorbVLines = adsorbHLines;
 
+const defaultNodes = [
+  {
+    key: "node1",
+    left: 100,
+    top: 280,
+    width: 158,
+    height: 65,
+    rotate: 0,
+  },
+  {
+    key: "node2",
+    left: 200,
+    top: 200,
+    width: 158,
+    height: 65,
+  },
+  {
+    key: "node3",
+    left: 300,
+    top: 80,
+    width: 150,
+    height: 65,
+  },
+  {
+    key: "node4",
+    left: 50,
+    top: 100,
+    width: 150,
+    height: 65,
+  },
+];
+
 class App extends React.Component {
   state = {
     checked: true,
@@ -29,37 +61,7 @@ class App extends React.Component {
     },
     nodes: localStorage.getItem("nodes")
       ? JSON.parse(localStorage.getItem("nodes")!)
-      : [
-          {
-            key: "node1",
-            left: 100,
-            top: 280,
-            width: 158,
-            height: 65,
-            rotate: 0,
-          },
-          {
-            key: "node2",
-            left: 200,
-            top: 200,
-            width: 158,
-            height: 65,
-          },
-          {
-            key: "node3",
-            left: 300,
-            top: 80,
-            width: 150,
-            height: 65,
-          },
-          {
-            key: "node4",
-            left: 50,
-            top: 100,
-            width: 150,
-            height: 65,
-          },
-        ],
+      : defaultNodes,
   };
 
   handleNodeMouseDown(key: string, e: MouseEvent) {
@@ -137,6 +139,33 @@ class App extends React.Component {
     });
   }
 
+  handleAddRect = () => {
+    const left = random(50, 400);
+    const width = random(50, 200);
+    const height = random(20, 80);
+    const rotate = random(0, 359);
+
+    const node = {
+      key: "node" + seq++,
+      left,
+      top: left,
+      width,
+      height,
+      rotate,
+    };
+
+    this.state.nodes.push(node);
+
+    this.forceUpdate();
+  };
+
+  handleReset = () => {
+    localStorage.removeItem("nodes");
+    this.setState({
+      nodes: defaultNodes,
+    });
+  };
+
   render() {
     const { nodes, current, checked, delta } = this.state;
 
@@ -161,7 +190,9 @@ class App extends React.Component {
                 checked={checked}
               />
             </label>
-            ({delta.left},{delta.top})
+            <button onClick={this.handleAddRect}>新增节点</button>
+            <button onClick={this.handleReset}>重置</button> ({delta.left.toFixed(0)},
+            {delta.top.toFixed(0)})
           </div>
           <Background />
           {adsorbHLines.map(line => {
@@ -208,9 +239,10 @@ class App extends React.Component {
                   top: node.top,
                   width: node.width,
                   height: node.height,
+                  transform: `rotate(${node.rotate || 0}deg)`,
                 }}
               >
-                {node.key}({node.left},{node.top})
+                {node.key}
               </div>
             );
           })}
