@@ -749,8 +749,8 @@ describe("test RefLine::getAdsorbDelta  -1", () => {
         },
         5,
         {
-          x: "right",
-          y: "down",
+          x: "left",
+          y: "up",
         }
       )
     ).toEqual({
@@ -780,8 +780,8 @@ describe("test RefLine::getAdsorbDelta  -1", () => {
         },
         5,
         {
-          x: "right",
-          y: "down",
+          x: "left",
+          y: "up",
         }
       )
     ).toEqual({
@@ -1183,8 +1183,8 @@ describe("test RefLine::getAdsorbDelta  -2", () => {
         },
         5,
         {
-          x: "right",
-          y: "down",
+          x: "left",
+          y: "up",
         }
       )
     ).toEqual({
@@ -1216,8 +1216,8 @@ describe("test RefLine::getAdsorbDelta  -2", () => {
         },
         5,
         {
-          x: "right",
-          y: "down",
+          x: "left",
+          y: "up",
         }
       )
     ).toEqual({
@@ -1314,7 +1314,7 @@ describe("test RefLine::getAdsorbDelta  -2", () => {
         },
         5,
         {
-          x: "left",
+          x: "right",
           y: "down",
         }
       )
