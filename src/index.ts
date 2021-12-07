@@ -608,7 +608,11 @@ export class RefLine<T extends Rect = Rect> {
         const currentOffset = currentOffsetList[minIndex];
         const dist = minOffset - (currentOffset + delta.left);
 
-        if (Math.abs(dist) < adsorbDistance && (isMoveLeft ? dist <= 0 : dist >= 0)) {
+        if (isMoveLeft && delta.left > 0) {
+          newDelta.left = 0;
+        } else if (!isMoveLeft && delta.left < 0) {
+          newDelta.left = 0;
+        } else if (Math.abs(dist) < adsorbDistance && (isMoveLeft ? dist <= 0 : dist >= 0)) {
           newDelta.left = dist + delta.left;
         }
       }
@@ -664,7 +668,11 @@ export class RefLine<T extends Rect = Rect> {
         const currentOffset = currentOffsetList[minIndex];
         const dist = minOffset - (currentOffset + delta.top);
 
-        if (Math.abs(dist) < adsorbDistance && (isMoveTop ? dist <= 0 : dist >= 0)) {
+        if (isMoveTop && delta.top > 0) {
+          newDelta.top = 0;
+        } else if (!isMoveTop && delta.top < 0) {
+          newDelta.top = 0;
+        } else if (Math.abs(dist) < adsorbDistance && (isMoveTop ? dist <= 0 : dist >= 0)) {
           newDelta.top = dist + delta.top;
         }
       }
