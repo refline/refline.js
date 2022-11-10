@@ -59,6 +59,7 @@ describe("test RefLine::Opts - adsorbVLines/adsorbHLines", () => {
     expect(refLine.hasMatchedRefLine("ht")).toEqual(true);
 
     expect(refLine.getAllRefLines().length).toEqual(0);
+    expect(refLine.getAllAdsorbRefLines().length).toEqual(2);
 
     expect(
       refLine.getAdsorbDelta(

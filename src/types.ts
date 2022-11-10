@@ -32,6 +32,10 @@ export interface RefLineMeta<T extends Rect = Rect> {
   end: number;
   rect: T;
   adsorbOnly?: boolean;
+  /**
+   * 当匹配到的是自定义吸附线
+   */
+  line?: AdsorbVLine | AdsorbVLine;
 }
 
 export interface MatchedLine<T extends Rect = Rect> {

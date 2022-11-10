@@ -137,7 +137,7 @@ export class RefLine<T extends Rect = Rect> {
   }
 
   getRectByKey(key: string | number) {
-    return find(this.__rects, rect => rect.key === key);
+    return find(this.__rects, (rect) => rect.key === key);
   }
 
   getOffsetRefLineMetaList(type: LineType, offset: number) {
@@ -213,7 +213,7 @@ export class RefLine<T extends Rect = Rect> {
     let lines = getRectRefLines(rect);
 
     if (this.getLineFilter()) {
-      lines = lines.filter(line => this.isEnableLine(line));
+      lines = lines.filter((line) => this.isEnableLine(line));
     }
 
     return lines;
@@ -225,13 +225,13 @@ export class RefLine<T extends Rect = Rect> {
     let hLines: RefLineMeta<T>[] = [];
 
     this._rects = current
-      ? this.__rects.filter(rect => rect.key !== current.key)
+      ? this.__rects.filter((rect) => rect.key !== current.key)
       : [...this.__rects];
 
-    this._rects.forEach(rect => {
+    this._rects.forEach((rect) => {
       const lines = this.getRectRefLines(rect);
 
-      lines.forEach(line => {
+      lines.forEach((line) => {
         const mKey = this.getLineMapKey(line);
         if (line.type === "vertical") {
           vLines.push(line);
@@ -251,7 +251,7 @@ export class RefLine<T extends Rect = Rect> {
     });
 
     // 添加自定义吸附线
-    this._adsorbVLines.forEach(line => {
+    this._adsorbVLines.forEach((line) => {
       const refLineMeta: RefLineMeta<T> = {
         type: "vertical",
         position: "vl",
@@ -266,6 +266,7 @@ export class RefLine<T extends Rect = Rect> {
           top: 0,
         } as T,
         adsorbOnly: true,
+        line,
       };
       vLines.push(refLineMeta);
 
@@ -275,7 +276,7 @@ export class RefLine<T extends Rect = Rect> {
 
       this._vLineMap.set(mKey, matched);
     });
-    this._adsorbHLines.forEach(line => {
+    this._adsorbHLines.forEach((line) => {
       const refLineMeta: RefLineMeta<T> = {
         type: "horizontal",
         position: "ht",
@@ -290,6 +291,7 @@ export class RefLine<T extends Rect = Rect> {
           top: line.offset,
         } as T,
         adsorbOnly: true,
+        line,
       };
       hLines.push(refLineMeta);
 
@@ -303,25 +305,25 @@ export class RefLine<T extends Rect = Rect> {
     vLines = vLines.sort((a, b) => a.offset - b.offset);
     hLines = hLines.sort((a, b) => a.offset - b.offset);
 
-    let vGroup = groupBy(vLines, line => this.getLineMapKey(line));
-    let hGroup = groupBy(hLines, line => this.getLineMapKey(line));
+    let vGroup = groupBy(vLines, (line) => this.getLineMapKey(line));
+    let hGroup = groupBy(hLines, (line) => this.getLineMapKey(line));
 
-    this._vLines = vGroup.keys.map(key => {
+    this._vLines = vGroup.keys.map((key) => {
       const lines = vGroup.group[key];
       return {
         offset: fixNumber(lines[0].offset, 0),
-        min: Math.min(...lines.map(line => line.offset)),
-        max: Math.max(...lines.map(line => line.offset)),
+        min: Math.min(...lines.map((line) => line.offset)),
+        max: Math.max(...lines.map((line) => line.offset)),
         refLineMetaList: lines,
       };
     });
 
-    this._hLines = hGroup.keys.map(key => {
+    this._hLines = hGroup.keys.map((key) => {
       const lines = hGroup.group[key];
       return {
         offset: fixNumber(lines[0].offset, 0),
-        min: Math.min(...lines.map(line => line.offset)),
-        max: Math.max(...lines.map(line => line.offset)),
+        min: Math.min(...lines.map((line) => line.offset)),
+        max: Math.max(...lines.map((line) => line.offset)),
         refLineMetaList: lines,
       };
     });
@@ -330,12 +332,13 @@ export class RefLine<T extends Rect = Rect> {
   }
 
   /**
-   * 匹配参考线，主要用于显示，不包括自定义吸附线
+   * 匹配参考线，主要用于显示
    * @param type
+   * @param {boolean} [adsorbOnly=false] 是否仅获取自定义吸附线或排除自定义吸附线
    * @param rect
    * @returns
    */
-  matchRefLines(type: LineType): MatchedLine<T>[] {
+  matchRefLines(type: LineType, adsorbOnly = false): MatchedLine<T>[] {
     const current = this.getCurrent();
     if (!current) return [];
 
@@ -348,7 +351,7 @@ export class RefLine<T extends Rect = Rect> {
 
     const cLines = this.getRectRefLines(current);
 
-    cLines.forEach(line => {
+    cLines.forEach((line) => {
       if (line.type !== type) return;
 
       const mKey = this.getLineMapKey(line);
@@ -357,7 +360,7 @@ export class RefLine<T extends Rect = Rect> {
 
       const matchedLine = getMatchedLine(
         line,
-        lines.filter(line => !line.adsorbOnly) // 过滤自定义吸附线
+        lines.filter((line) => (adsorbOnly ? line.adsorbOnly : !line.adsorbOnly)) // 过滤自定义吸附线
       );
 
       if (matchedLine) {
@@ -386,7 +389,7 @@ export class RefLine<T extends Rect = Rect> {
     let next: number = Infinity;
     let nextDist: number = Infinity;
 
-    lines.forEach(line => {
+    lines.forEach((line) => {
       const d = Math.abs(line.min - offset);
       if (line.min < offset && d >= 0.5) {
         prev = Math.max(line.min, prev);
@@ -414,7 +417,7 @@ export class RefLine<T extends Rect = Rect> {
     if (!current) return false;
 
     const lines = this.getRectRefLines(current);
-    const line = find(lines, line => line.position === position);
+    const line = find(lines, (line) => line.position === position);
 
     if (!line) return false;
     const mKey = this.getLineMapKey(line);
@@ -437,6 +440,11 @@ export class RefLine<T extends Rect = Rect> {
     return this.matchRefLines("vertical");
   }
 
+  /**
+   * 返回当前矩形匹配到的垂直参考线
+   * 注：不包括自定义吸附参考线，既：adsorbVLines
+   * @returns
+   */
   getVRefLines() {
     return this.matchRefLines("vertical");
   }
@@ -449,6 +457,11 @@ export class RefLine<T extends Rect = Rect> {
     return this.matchRefLines("horizontal");
   }
 
+  /**
+   * 返回当前矩形匹配到的水平参考线
+   * 注：不包括自定义吸附参考线，既：adsorbHLines
+   * @returns
+   */
   getHRefLines() {
     return this.matchRefLines("horizontal");
   }
@@ -461,8 +474,34 @@ export class RefLine<T extends Rect = Rect> {
     return [...this.matchVRefLines(), ...this.matchHRefLines()];
   }
 
+  /**
+   * 返回当前矩形匹配到的 水平、垂直参考线
+   * 注：不包括自定义吸附参考线，既：adsorbVLines、adsorbHLines
+   * @returns
+   */
   getAllRefLines() {
     return [...this.matchVRefLines(), ...this.matchHRefLines()];
+  }
+  /**
+   * 返回当前矩形匹配到的自定义水平参考线
+   * @returns
+   */
+  getAdsorbHRefLines() {
+    return this.matchRefLines("horizontal", true);
+  }
+  /**
+   * 返回当前矩形匹配到的自定义垂直参考线
+   * @returns
+   */
+  getAdsorbVRefLines() {
+    return this.matchRefLines("vertical", true);
+  }
+  /**
+   * 返回当前矩形匹配到的自定义水平、垂直参考线
+   * @returns
+   */
+  getAllAdsorbRefLines() {
+    return [...this.getAdsorbVRefLines(), ...this.getAdsorbHRefLines()];
   }
 
   /**
