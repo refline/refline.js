@@ -259,7 +259,27 @@ export declare class RefLine<T extends Rect = Rect> {
     hasMatchedRefLine(position: RefLinePosition): boolean;
     getVRefLines(): MatchedLine<T>[];
     getHRefLines(): MatchedLine<T>[];
+    /**
+     * 返回当前矩形匹配到的 水平、垂直参考线
+     * 注：不包括自定义吸附参考线，既：adsorbVLines、adsorbHLines
+     * @returns
+     */
     getAllRefLines(): MatchedLine<T>[];
+    /**
+     * 返回当前矩形匹配到的自定义水平参考线
+     * @returns
+     */
+    getAdsorbHRefLines(): MatchedLine<T>[];
+    /**
+     * 返回当前矩形匹配到的自定义垂直参考线
+     * @returns
+     */
+    getAdsorbVRefLines(): MatchedLine<T>[];
+    /**
+     * 返回当前矩形匹配到的自定义水平、垂直参考线
+     * @returns
+     */
+    getAllAdsorbRefLines(): MatchedLine<T>[];
     /**
      * 适配偏移量，达到吸附效果
      * @param type
