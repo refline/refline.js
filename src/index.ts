@@ -31,11 +31,19 @@ export { fixNumber, coordinateRotation, getBoundingRect, getRectRefLines, mergeR
 export interface RefLineOpts<T extends Rect = Rect> {
   rects: T[];
   current?: T | string;
-  lineFilter?: (line: RefLineMeta) => boolean;
-  // 垂直吸附线
+
+  /**
+   * 过滤矩形生成的吸附线，不包含自定义吸附线
+   */
+  lineFilter?: (line: RefLineMeta<T>) => boolean;
+  // 自定义垂直吸附线
   adsorbVLines?: Omit<AdsorbLine, "type">[];
-  // 水平吸附线
+  // 自定义水平吸附线
   adsorbHLines?: Omit<AdsorbLine, "type">[];
+  /**
+   * 吸附匹配流程中对吸附线的过滤，包含所有线段
+   */
+  adsorbLineFilter?: (line: LineGroup<T>) => boolean;
 }
 export class RefLine<T extends Rect = Rect> {
   protected opts: Omit<RefLineOpts<T>, "rects" | "current"> = {};
@@ -119,6 +127,10 @@ export class RefLine<T extends Rect = Rect> {
     this._adsorbHLines = lines;
 
     this._dirty = true;
+  }
+
+  get adsorbLineFilter() {
+    return this.opts.adsorbLineFilter;
   }
 
   constructor(opts?: RefLineOpts<T>) {
@@ -390,6 +402,10 @@ export class RefLine<T extends Rect = Rect> {
     let nextDist: number = Infinity;
 
     lines.forEach((line) => {
+      if (this.adsorbLineFilter && !this.adsorbLineFilter(line)) {
+        return;
+      }
+
       const d = Math.abs(line.min - offset);
       if (line.min < offset && d >= 0.5) {
         prev = Math.max(line.min, prev);

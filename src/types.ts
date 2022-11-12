@@ -23,7 +23,14 @@ export type LineType = "horizontal" | "vertical";
 export type VRefLinePosition = "vl" | "vc" | "vr";
 export type HRefLinePosition = "ht" | "hc" | "hb";
 export type RefLinePosition = VRefLinePosition | HRefLinePosition;
+export interface AdsorbLine {
+  key: string;
+  type: LineType;
+  offset: number;
+}
 
+export type AdsorbVLine = Omit<AdsorbLine, "type">;
+export type AdsorbHLine = Omit<AdsorbLine, "type">;
 export interface RefLineMeta<T extends Rect = Rect> {
   type: LineType;
   position: RefLinePosition;
@@ -65,12 +72,3 @@ export enum MOVE_DIR {
   MOVE_LEFT,
   NONE,
 }
-
-export interface AdsorbLine {
-  key: string;
-  type: LineType;
-  offset: number;
-}
-
-export type AdsorbVLine = Omit<AdsorbLine, "type">;
-export type AdsorbHLine = Omit<AdsorbLine, "type">;
