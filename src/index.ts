@@ -9,6 +9,7 @@ import {
   AdsorbLine,
   AdsorbVLine,
   AdsorbHLine,
+  Point,
 } from "./types";
 import {
   toNumber as fixNumber,
@@ -21,6 +22,7 @@ import {
   getMatchedLine,
   coordinateRotation,
   isNil,
+  createRectFromPoint,
 } from "./utils";
 export const version = "%VERSION%";
 
@@ -30,6 +32,7 @@ export { fixNumber, coordinateRotation, getBoundingRect, getRectRefLines, mergeR
 
 export interface RefLineOpts<T extends Rect = Rect> {
   rects: T[];
+  points?: Point[];
   current?: T | string;
 
   /**
@@ -71,6 +74,10 @@ export class RefLine<T extends Rect = Rect> {
     return this._rects;
   }
 
+  /**
+   * @deprecated
+   * 会覆盖 points 属性
+   */
   set rects(rects: T[]) {
     this.__rects = rects;
 
@@ -136,6 +143,13 @@ export class RefLine<T extends Rect = Rect> {
   constructor(opts?: RefLineOpts<T>) {
     this.opts = opts || {};
     this.__rects = opts?.rects || [];
+
+    if (opts?.points) {
+      opts.points.forEach((point) => {
+        this.__rects.push(createRectFromPoint(point) as T);
+      });
+    }
+
     this._lineFilter = opts?.lineFilter || null;
 
     this._adsorbVLines = opts?.adsorbVLines || [];
@@ -161,11 +175,37 @@ export class RefLine<T extends Rect = Rect> {
 
   /**
    * @deprecated
+   * 会覆盖 points 属性
    * @param rects
    */
   setRects(rects: T[]) {
     this.__rects = rects;
     this._dirty = true;
+  }
+
+  addPoint(point: Point) {
+    const rect = createRectFromPoint(point);
+    this.__rects.push(rect as T);
+
+    this._dirty = true;
+
+    return rect;
+  }
+
+  addRect(rect: T) {
+    this.__rects.push(rect);
+
+    this._dirty = true;
+
+    return rect;
+  }
+
+  removeRect(key: string | number) {
+    this.__rects = this.__rects.filter((rect) => rect.key !== key);
+  }
+
+  removePoint(key: string | number) {
+    return this.removeRect(key);
   }
 
   protected getRect(rect: T | string): T | null {
@@ -740,6 +780,7 @@ export class RefLine<T extends Rect = Rect> {
     pageX,
     pageY,
     current = this.getCurrent(),
+    point,
     distance = 5,
     disableAdsorb = false,
     scale,
@@ -747,10 +788,18 @@ export class RefLine<T extends Rect = Rect> {
     pageX: number;
     pageY: number;
     current?: T | null;
+    /**
+     * 优先级高于 current
+     */
+    point?: Point;
     distance?: number;
     disableAdsorb?: boolean;
     scale?: number;
   }) {
+    if (point) {
+      current = createRectFromPoint(point) as T;
+    }
+
     if (!current) {
       throw new Error("[refline.js] current rect does not exist!");
     }
@@ -774,6 +823,7 @@ export class RefLine<T extends Rect = Rect> {
       pageX?: number;
       pageY?: number;
       current?: T;
+      point?: Point;
       distance?: number;
       disableAdsorb?: boolean;
       scale?: number;
@@ -786,6 +836,10 @@ export class RefLine<T extends Rect = Rect> {
         currentRect = {
           ...data.current,
         };
+      }
+
+      if (point) {
+        currentRect = createRectFromPoint(point) as T;
       }
 
       if (!isNil(data.distance)) {

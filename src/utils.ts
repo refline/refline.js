@@ -7,6 +7,7 @@ import {
   Delta,
   MOVE_DIR,
   MatchedLine,
+  Point,
 } from "./types";
 
 export function toNumber(v: number, numDigits = 0) {
@@ -167,7 +168,7 @@ export function groupBy<T>(values: T[], getKey: (value: T) => string) {
   const keys: string[] = [];
   const group: Record<string, T[]> = Object.create(null);
 
-  values.forEach(value => {
+  values.forEach((value) => {
     const key = getKey(value);
     if (!group[key]) {
       group[key] = [];
@@ -252,11 +253,11 @@ export function mergeRefLineMeta<T extends Rect>(
   const offset = refLineMetaList[0].offset;
 
   const start = Math.min(
-    ...refLineMetaList.map(rLine => rLine.start),
+    ...refLineMetaList.map((rLine) => rLine.start),
     opts?.start == undefined ? Infinity : opts.start
   );
   const end = Math.max(
-    ...refLineMetaList.map(rLine => rLine.end),
+    ...refLineMetaList.map((rLine) => rLine.end),
     opts?.end == undefined ? -Infinity : opts.end
   );
 
@@ -298,4 +299,20 @@ export function getMatchedLine<T extends Rect>(
 
 export function isNil<T>(value: T) {
   return value == null;
+}
+
+let uidIndex = 1;
+
+export function uid() {
+  return uidIndex++;
+}
+
+export function createRectFromPoint(point: Point): Rect {
+  return {
+    key: point.key || "__point__" + uid(),
+    left: point.x,
+    top: point.y,
+    width: 1,
+    height: 1,
+  };
 }

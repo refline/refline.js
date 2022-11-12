@@ -72,3 +72,9 @@ export enum MOVE_DIR {
   MOVE_LEFT,
   NONE,
 }
+
+export interface Point {
+  key?: string | number;
+  x: number;
+  y: number;
+}
