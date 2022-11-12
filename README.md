@@ -26,6 +26,10 @@ const refLine = new RefLine({
     width: 400,
     height: 800
   }],
+  points: [{
+    x: 300,
+    y: 300
+  }],
   current: {
     key: 'b',
     left: 100,
@@ -69,7 +73,9 @@ const {delta} = updater({
 ```ts
 interface RefLineOpts<T extends Rect> {
     // 所有矩形列表
-    rects: T[];
+    rects?: T[];
+    // 设置单个吸附点
+    points?: Point;
     // 当前检查的矩形，可通过setCurrent改变
     current?: T | string;
     // 参考线过滤，默认提供6条参考线(水平、垂直)，可通过该参数过滤不需要的参考线
@@ -78,6 +84,10 @@ interface RefLineOpts<T extends Rect> {
     adsorbVLines?: Array<{key: string; offset: number}>;
     // 自定义水平吸附线
     adsorbHLines?: Array<{key: string; offset: number}>;
+    /**
+     * 吸附匹配流程中对吸附线的过滤，包含所有线段
+     */
+    adsorbLineFilter?: (line: LineGroup) => boolean;
 }
 ```
 
@@ -144,6 +154,10 @@ interface IOpts{
   pageX: number;
   pageY: number;
   current?: Rect;
+   /**
+    * 优先级高于 current
+    */
+  point?: Point;
   distance?: number;
   // 禁用吸附计算
   disableAdsorb?: boolean;
@@ -157,6 +171,10 @@ type Updater = (data: {
     pageX?: number;
     pageY?: number;
     current?: Rect;
+     /**
+      * 优先级高于 current
+      */
+    point?: Point;
     distance?: number;
     // 禁用吸附计算
     disableAdsorb?: boolean;
@@ -209,19 +227,26 @@ rect.top += ret.delta.top
 
 ```
 
-## Types
+## Interfaces
 
 ```ts
 export interface RefLineOpts<T extends Rect = Rect> {
-    rects: T[];
+    rects?: T[];
+    points?: Point[];
     current?: T | string;
-    lineFilter?: (line: RefLineMeta) => boolean;
+    /**
+     * 过滤矩形生成的吸附线，不包含自定义吸附线
+     */
+    lineFilter?: (line: RefLineMeta<T>) => boolean;
     adsorbVLines?: Omit<AdsorbLine, "type">[];
     adsorbHLines?: Omit<AdsorbLine, "type">[];
+    /**
+     * 吸附匹配流程中对吸附线的过滤，包含所有线段
+     */
+    adsorbLineFilter?: (line: LineGroup<T>) => boolean;
 }
 export declare class RefLine<T extends Rect = Rect> {
     get rects(): T[];
-    set rects(rects: T[]);
     get vLines(): LineGroup<T>[];
     get hLines(): LineGroup<T>[];
     get vLineMap(): Map<string, RefLineMeta<T>[]>;
@@ -230,20 +255,26 @@ export declare class RefLine<T extends Rect = Rect> {
     set adsorbVLines(lines: AdsorbVLine[]);
     get adsorbHLines(): AdsorbHLine[];
     set adsorbHLines(lines: AdsorbHLine[]);
+    get adsorbLineFilter(): ((line: LineGroup<T>) => boolean) | undefined;
     constructor(opts?: RefLineOpts<T>);
     getRectByKey(key: string | number): T | null;
     getOffsetRefLineMetaList(type: LineType, offset: number): RefLineMeta<T>[];
+    addPoint(point: Point): Rect;
+    addRect(rect: T): T;
+    removeRect(key: string | number): void;
+    removePoint(key: string | number): void;
     setCurrent(current: T | string | null): void;
     getCurrent(): T | null;
     setLineFilter(filter: ((line: RefLineMeta) => boolean) | null): void;
     getLineFilter(): ((line: RefLineMeta<Rect>) => boolean) | null;
     /**
-     * 匹配参考线，主要用于显示，不包括自定义吸附线
+     * 匹配参考线，主要用于显示
      * @param type
+     * @param {boolean} [adsorbOnly=false] 是否仅获取自定义吸附线或排除自定义吸附线
      * @param rect
      * @returns
      */
-    matchRefLines(type: LineType): MatchedLine<T>[];
+    matchRefLines(type: LineType, adsorbOnly?: boolean): MatchedLine<T>[];
     /**
      * 给定offset(坐标x或y)的值，返回距离该offset的最近的两个offset(上下或左右)及距离
      * @param type
@@ -257,8 +288,33 @@ export declare class RefLine<T extends Rect = Rect> {
      * @returns
      */
     hasMatchedRefLine(position: RefLinePosition): boolean;
+    /**
+     * alias getVRefLines
+     * @returns
+     */
+    matchVRefLines(): MatchedLine<T>[];
+    /**
+     * 返回当前矩形匹配到的垂直参考线
+     * 注：不包括自定义吸附参考线，既：adsorbVLines
+     * @returns
+     */
     getVRefLines(): MatchedLine<T>[];
+    /**
+     * alias getHRefLines
+     * @returns
+     */
+    matchHRefLines(): MatchedLine<T>[];
+    /**
+     * 返回当前矩形匹配到的水平参考线
+     * 注：不包括自定义吸附参考线，既：adsorbHLines
+     * @returns
+     */
     getHRefLines(): MatchedLine<T>[];
+    /**
+     * alias getAllRefLines
+     * @returns
+     */
+    matchAllRefLines(): MatchedLine<T>[];
     /**
      * 返回当前矩形匹配到的 水平、垂直参考线
      * 注：不包括自定义吸附参考线，既：adsorbVLines、adsorbHLines
@@ -291,15 +347,22 @@ export declare class RefLine<T extends Rect = Rect> {
     getOffsetAdsorbDelta(type: LineType, offset: number, delta: number, adsorbDistance?: number): number;
     /**
      * 适配偏移量，达到吸附效果
+     * @param delta
+     * @param adsorbDistance
+     * @returns
      */
     getAdsorbDelta(delta: Delta, adsorbDistance: number, dir: {
         x: "left" | "right" | "none";
         y: "up" | "down" | "none";
     }): Delta;
-    adsorbCreator({ pageX, pageY, current, distance, disableAdsorb, }: {
+    adsorbCreator({ pageX, pageY, current, point, distance, disableAdsorb, scale, }: {
         pageX: number;
         pageY: number;
         current?: T | null;
+        /**
+         * 优先级高于 current
+         */
+        point?: Point;
         distance?: number;
         disableAdsorb?: boolean;
         scale?: number;
@@ -307,10 +370,10 @@ export declare class RefLine<T extends Rect = Rect> {
         pageX?: number;
         pageY?: number;
         current?: T;
+        point?: Point;
         distance?: number;
         disableAdsorb?: boolean;
         scale?: number;
-        // 设置距离起始坐标偏移量，设置后相应的pageX或pageY及scale会失效
         offsetX?: number;
         offsetY?: number;
     }) => {
@@ -332,68 +395,85 @@ export declare class RefLine<T extends Rect = Rect> {
 export declare function createRefLine<T extends Rect = Rect>(opts: RefLineOpts<T>): RefLine<T>;
 export default RefLine;
 
-interface Rect {
-    key: string | number;
-    left: number;
-    top: number;
-    width: number;
-    height: number;
-    rotate?: number;
-    [x: string]: any;
+export interface Rect {
+  key: string | number;
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  rotate?: number;
+  [x: string]: any;
 }
-interface BoundingRect {
-    left: number;
-    top: number;
-    right: number;
-    bottom: number;
-    width: number;
-    height: number;
-}
-declare type LineType = "horizontal" | "vertical";
-declare type VRefLinePosition = "vl" | "vc" | "vr";
-declare type HRefLinePosition = "ht" | "hc" | "hb";
-declare type RefLinePosition = VRefLinePosition | HRefLinePosition;
-interface RefLineMeta<T extends Rect = Rect> {
-    type: LineType;
-    position: RefLinePosition;
-    offset: number;
-    start: number;
-    end: number;
-    rect: T;
-}
-interface MatchedLine<T extends Rect = Rect> {
-    type: LineType;
-    left: number;
-    top: number;
-    size: number;
-    refLineMetaList: RefLineMeta<T>[];
-}
-interface LineGroup<T extends Rect = Rect> {
-    min: number;
-    max: number;
-    offset: number;
-    refLineMetaList: RefLineMeta<T>[];
-}
-interface Delta {
-    left: number;
-    top: number;
-}
-declare enum MOVE_DIR {
-    MOVE_TOP = 0,
-    MOVE_RIGHT = 1,
-    MOVE_BOTTOM = 2,
-    MOVE_LEFT = 3,
-    NONE = 4
-}
-export interface AdsorbLine {
-    key: string;
-    type: LineType;
-    offset: number;
-}
-export declare type AdsorbVLine = Omit<AdsorbLine, "type">;
-export declare type AdsorbHLine = Omit<AdsorbLine, "type">;
 
+export interface BoundingRect {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+  width: number;
+  height: number;
+}
+
+export type LineType = "horizontal" | "vertical";
+
+// horizontal/vertical  top/center/bottom left/center/right
+export type VRefLinePosition = "vl" | "vc" | "vr";
+export type HRefLinePosition = "ht" | "hc" | "hb";
+export type RefLinePosition = VRefLinePosition | HRefLinePosition;
+export interface AdsorbLine {
+  key: string;
+  type: LineType;
+  offset: number;
+}
+
+export type AdsorbVLine = Omit<AdsorbLine, "type">;
+export type AdsorbHLine = Omit<AdsorbLine, "type">;
+export interface RefLineMeta<T extends Rect = Rect> {
+  type: LineType;
+  position: RefLinePosition;
+  offset: number;
+  start: number;
+  end: number;
+  rect: T;
+  adsorbOnly?: boolean;
+  /**
+   * 当匹配到的是自定义吸附线
+   */
+  line?: AdsorbVLine | AdsorbVLine;
+}
+
+export interface MatchedLine<T extends Rect = Rect> {
+  type: LineType;
+  left: number;
+  top: number;
+  size: number;
+  refLineMetaList: RefLineMeta<T>[];
+}
+
+export interface LineGroup<T extends Rect = Rect> {
+  min: number;
+  max: number;
+  offset: number;
+  refLineMetaList: RefLineMeta<T>[];
+}
+
+export interface Delta {
+  left: number;
+  top: number;
+}
+
+export enum MOVE_DIR {
+  MOVE_TOP,
+  MOVE_RIGHT,
+  MOVE_BOTTOM,
+  MOVE_LEFT,
+  NONE,
+}
+
+export interface Point {
+  key?: string | number;
+  x: number;
+  y: number;
+}
 
 ```
-
-文档及示例完善中...

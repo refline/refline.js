@@ -31,7 +31,7 @@ export * from "./types";
 export { fixNumber, coordinateRotation, getBoundingRect, getRectRefLines, mergeRefLineMeta };
 
 export interface RefLineOpts<T extends Rect = Rect> {
-  rects: T[];
+  rects?: T[];
   points?: Point[];
   current?: T | string;
 
