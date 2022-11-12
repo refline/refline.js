@@ -1620,7 +1620,7 @@ describe("test RefLine::getAdsorbDelta  -3", () => {
 });
 
 describe("test RefLine::getAdsorbDelta  -4", () => {
-  const rects = [];
+  const rects: any = [];
 
   test("basic - 1", () => {
     const refLine = new RefLine({
@@ -1798,7 +1798,7 @@ describe("test RefLine::opts  - filterLine", () => {
       current,
     });
 
-    refLine.setLineFilter(line => {
+    refLine.setLineFilter((line) => {
       if (line.position === "vc" || line.position === "hb") return false;
       return true;
     });
@@ -1874,5 +1874,114 @@ describe("test RefLine::opts  - filterLine", () => {
       [150, 20],
       [200, 30],
     ]);
+  });
+});
+
+describe("test RefLine::opts  - adsorbLineFilter", () => {
+  const rects = [
+    {
+      key: "a",
+      left: 100,
+      top: 100,
+      width: 100,
+      height: 100,
+    },
+  ];
+
+  const current = {
+    key: "b",
+    left: 100,
+    top: 100,
+    width: 100,
+    height: 100,
+  };
+
+  test("adsorbLineFilter - getNearestOffsetFromOffset1", () => {
+    const refLine = new RefLine({
+      rects,
+      current,
+      adsorbLineFilter(line) {
+        return false;
+      },
+    });
+
+    expect(refLine.getNearestOffsetFromOffset("vertical", 120)).toEqual([null, null]);
+
+    expect(refLine.getNearestOffsetFromOffset("vertical", 170)).toEqual([null, null]);
+
+    expect(refLine.getNearestOffsetFromOffset("horizontal", 120)).toEqual([null, null]);
+
+    expect(refLine.getNearestOffsetFromOffset("horizontal", 170)).toEqual([null, null]);
+  });
+
+  test("adsorbLineFilter - getNearestOffsetFromOffset2", () => {
+    const refLine = new RefLine({
+      rects,
+      current,
+      adsorbHLines: [
+        {
+          key: "h1",
+          offset: 500,
+        },
+        {
+          key: "h2",
+          offset: 400,
+        },
+      ],
+      adsorbVLines: [
+        {
+          key: "v1",
+          offset: 500,
+        },
+        {
+          key: "v2",
+          offset: 400,
+        },
+      ],
+    });
+
+    expect(refLine.getNearestOffsetFromOffset("vertical", 450)).toEqual([
+      [400, 50],
+      [500, 50],
+    ]);
+
+    expect(refLine.getNearestOffsetFromOffset("horizontal", 450)).toEqual([
+      [400, 50],
+      [500, 50],
+    ]);
+  });
+
+  test("adsorbLineFilter - getNearestOffsetFromOffset3", () => {
+    const refLine = new RefLine({
+      rects,
+      current,
+      adsorbHLines: [
+        {
+          key: "h1",
+          offset: 500,
+        },
+        {
+          key: "h2",
+          offset: 400,
+        },
+      ],
+      adsorbVLines: [
+        {
+          key: "v1",
+          offset: 500,
+        },
+        {
+          key: "v2",
+          offset: 400,
+        },
+      ],
+      adsorbLineFilter(line) {
+        return !line.refLineMetaList.every((line) => line.adsorbOnly);
+      },
+    });
+
+    expect(refLine.getNearestOffsetFromOffset("vertical", 450)).toEqual([[200, 250], null]);
+
+    expect(refLine.getNearestOffsetFromOffset("horizontal", 450)).toEqual([[200, 250], null]);
   });
 });
