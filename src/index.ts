@@ -276,6 +276,15 @@ export class RefLine<T extends Rect = Rect> {
     let vLines: RefLineMeta<T>[] = [];
     let hLines: RefLineMeta<T>[] = [];
 
+    const reset = () => {
+      this._vLines = [];
+      this._hLines = [];
+      this._vLineMap = new Map();
+      this._hLineMap = new Map();
+    };
+    // 缓存重置
+    reset();
+
     this._rects = current
       ? this.__rects.filter((rect) => rect.key !== current.key)
       : [...this.__rects];

@@ -32,6 +32,20 @@ describe("test RefLine::prototype", () => {
 
     expect(refLine.vLines.length).toEqual(9);
     expect(refLine.vLineMap.size).toEqual(9);
+    expect(refLine.vLineMap.get("0")?.length).toEqual(1);
+    expect(refLine.hLines.length).toEqual(9);
+    expect(refLine.hLineMap.size).toEqual(9);
+
+    const rect = refLine.addPoint({
+      x: 1,
+      y: 1,
+    });
+
+    refLine.removePoint(rect.key);
+
+    expect(refLine.vLines.length).toEqual(9);
+    expect(refLine.vLineMap.size).toEqual(9);
+    expect(refLine.vLineMap.get("0")?.length).toEqual(1);
     expect(refLine.hLines.length).toEqual(9);
     expect(refLine.hLineMap.size).toEqual(9);
   });
