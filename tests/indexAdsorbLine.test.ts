@@ -36,7 +36,7 @@ describe("test RefLine::Opts - adsorbVLines/adsorbHLines", () => {
       ],
       adsorbHLines: [
         {
-          key: "a",
+          key: "b",
           offset: 25,
         },
       ],
@@ -46,6 +46,9 @@ describe("test RefLine::Opts - adsorbVLines/adsorbHLines", () => {
     expect(refLine.vLineMap.size).toEqual(10);
     expect(refLine.hLines.length).toEqual(10);
     expect(refLine.hLineMap.size).toEqual(10);
+
+    expect(refLine.adsorbVLines[0].key).toEqual("a");
+    expect(refLine.adsorbHLines[0].key).toEqual("b");
 
     refLine.setCurrent({
       key: "d",

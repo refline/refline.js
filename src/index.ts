@@ -117,7 +117,7 @@ export class RefLine<T extends Rect = Rect> {
   }
 
   get adsorbVLines() {
-    return this._adsorbHLines;
+    return this._adsorbVLines;
   }
 
   set adsorbVLines(lines: AdsorbVLine[]) {
