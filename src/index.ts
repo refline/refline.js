@@ -39,6 +39,10 @@ export interface RefLineOpts<T extends Rect = Rect> {
    * 过滤矩形生成的吸附线，不包含自定义吸附线
    */
   lineFilter?: (line: RefLineMeta<T>) => boolean;
+  /**
+   * 自定义处理矩形生成的吸附线，不包含自定义吸附线
+   */
+  lineProcess?: (line: RefLineMeta<T>) => void
   // 自定义垂直吸附线
   adsorbVLines?: Omit<AdsorbLine, "type">[];
   // 自定义水平吸附线
@@ -65,6 +69,7 @@ export class RefLine<T extends Rect = Rect> {
   protected _adsorbVLines: AdsorbVLine[] = [];
   protected _adsorbHLines: AdsorbHLine[] = [];
   protected _lineFilter: ((line: RefLineMeta) => boolean) | null = null;
+  protected _lineProcess: ((line: RefLineMeta) => void) | null = null
 
   get rects() {
     if (this._dirty) {
@@ -151,6 +156,7 @@ export class RefLine<T extends Rect = Rect> {
     }
 
     this._lineFilter = opts?.lineFilter || null;
+    this._lineProcess = opts?.lineProcess || null;
 
     this._adsorbVLines = opts?.adsorbVLines || [];
     this._adsorbHLines = opts?.adsorbHLines || [];
@@ -241,6 +247,15 @@ export class RefLine<T extends Rect = Rect> {
     return this._lineFilter;
   }
 
+  setLineProcess(process: ((line: RefLineMeta) => void) | null) {
+    this._lineProcess = process;
+    this._dirty = true;
+  }
+
+  getLineProcess() {
+    return this._lineProcess;
+  }
+
   protected toLineMapKey<S>(v: S) {
     return v + "";
   }
@@ -263,6 +278,11 @@ export class RefLine<T extends Rect = Rect> {
 
   protected getRectRefLines(rect: T) {
     let lines = getRectRefLines(rect);
+
+    const lineProcess = this.getLineProcess()
+    if (lineProcess) {
+      lines.forEach(lineProcess);
+    }
 
     if (this.getLineFilter()) {
       lines = lines.filter((line) => this.isEnableLine(line));

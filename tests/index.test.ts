@@ -1998,4 +1998,24 @@ describe("test RefLine::opts  - adsorbLineFilter", () => {
 
     expect(refLine.getNearestOffsetFromOffset("horizontal", 450)).toEqual([[200, 250], null]);
   });
+
+  test("lineProcess", () => {
+    const refLine = new RefLine({
+      rects: [{
+        key: "lineProcess",
+        left: 100,
+        top: 100,
+        width: 101,
+        height: 101,
+      },],
+      lineProcess(line) {
+        if (line.position === 'vc' || line.position === 'hc') {
+          line.offset = ~~line.offset
+        }
+      }
+    });
+
+    expect(refLine.vLines[1].offset).toEqual(150);
+    expect(refLine.hLines[1].offset).toEqual(150);
+  });
 });
