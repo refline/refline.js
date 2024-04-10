@@ -80,6 +80,10 @@ interface RefLineOpts<T extends Rect> {
     current?: T | string;
     // 参考线过滤，默认提供6条参考线(水平、垂直)，可通过该参数过滤不需要的参考线
     lineFilter?: (line: RefLineMeta) => boolean;
+    /**
+     * 自定义处理矩形生成的吸附线，不包含自定义吸附线
+     */
+    lineProcess?: (line: RefLineMeta<T>) => void
     // 自定义垂直吸附线
     adsorbVLines?: Array<{key: string; offset: number}>;
     // 自定义水平吸附线
@@ -267,6 +271,8 @@ export declare class RefLine<T extends Rect = Rect> {
     getCurrent(): T | null;
     setLineFilter(filter: ((line: RefLineMeta) => boolean) | null): void;
     getLineFilter(): ((line: RefLineMeta<Rect>) => boolean) | null;
+    setLineProcess(process: ((line: RefLineMeta) => void) | null): void
+    getLineProcess(): ((line: RefLineMeta) => void) | null
     /**
      * 匹配参考线，主要用于显示
      * @param type
