@@ -542,6 +542,52 @@ describe("test adsorbCreator", () => {
     rect2.top += ret.delta.top;
   });
 
+  test("basic 03 lineProcess", () => {
+    const rect1 = {
+      key: "a",
+      left: 126,
+      top: 25,
+      width: 101,
+      height: 101,
+    };
+
+    const rect2 = {
+      key: "b",
+      left: 75,
+      top: 147,
+      width: 203,
+      height: 203,
+    };
+
+    const refLine = createRefLine({
+      rects: [rect1],
+      lineProcess(line) {
+        line.offset = ~~line.offset
+      }
+    });
+
+    const updater = refLine.adsorbCreator({
+      current: rect2,
+      pageX: 0,
+      pageY: 0,
+      distance: 5,
+    });
+
+    expect(
+      updater({
+        pageX: -1,
+        pageY: 0,
+      }).rect
+    ).toMatchObject({
+      key: "b",
+      left: 75,
+      top: 147,
+      width: 203,
+      height: 203,
+    });
+
+  });
+
   test("basic points 01", () => {
     const rect1 = {
       key: "a",

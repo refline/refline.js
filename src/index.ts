@@ -277,12 +277,14 @@ export class RefLine<T extends Rect = Rect> {
   }
 
   protected getRectRefLines(rect: T) {
-    let lines = getRectRefLines(rect);
+    let lines = getRectRefLines(rect, {
+      lineProcess: this.getLineProcess()
+    });
 
-    const lineProcess = this.getLineProcess()
-    if (lineProcess) {
-      lines.forEach(lineProcess);
-    }
+    // const lineProcess = this.getLineProcess()
+    // if (lineProcess) {
+    //   lines.forEach(lineProcess);
+    // }
 
     if (this.getLineFilter()) {
       lines = lines.filter((line) => this.isEnableLine(line));
@@ -666,7 +668,9 @@ export class RefLine<T extends Rect = Rect> {
 
     if (adsorbDistance < 1) return newDelta;
 
-    const refLineMetaList = getRectRefLines(rect);
+    const refLineMetaList = getRectRefLines(rect, {
+      lineProcess: this.getLineProcess()
+    });
     const lineStatus = [
       this.isEnableLine(refLineMetaList[0]),
       this.isEnableLine(refLineMetaList[1]),

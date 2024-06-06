@@ -101,8 +101,10 @@ export function getBoundingRect(
 
 // 获取矩形6条参考线
 // 左/中/右 及 上/中/下
-export function getRectRefLines<T extends Rect = Rect>(rect: T): RefLineMeta<T>[] {
-  const lines: RefLineMeta<T>[] = [];
+export function getRectRefLines<T extends Rect = Rect>(rect: T, options?: {
+  lineProcess?: ((line: RefLineMeta) => void) | null
+}): RefLineMeta<T>[] {
+  let lines: RefLineMeta<T>[] = [];
 
   const boundingRect = getBoundingRect(rect);
 
@@ -112,7 +114,7 @@ export function getRectRefLines<T extends Rect = Rect>(rect: T): RefLineMeta<T>[
   const mx = boundingRect.left + (width === 1 ? 0 : boundingRect.width / 2);
   const my = boundingRect.top + (height === 1 ? 0 : boundingRect.height / 2);
 
-  return [
+  lines = [
     {
       type: "vertical",
       position: "vl",
@@ -162,6 +164,12 @@ export function getRectRefLines<T extends Rect = Rect>(rect: T): RefLineMeta<T>[
       rect,
     },
   ];
+
+  if (options && options.lineProcess) {
+    lines.forEach(options.lineProcess)
+  }
+
+  return lines
 }
 
 export function groupBy<T>(values: T[], getKey: (value: T) => string) {
