@@ -92,6 +92,23 @@ interface RefLineOpts<T extends Rect> {
      * 吸附匹配流程中对吸附线的过滤，包含所有线段
      */
     adsorbLineFilter?: (line: LineGroup) => boolean;
+    /**
+     * 吸附线的值处理，默认取整
+     * 如果支持的最大缩放值为1-10，建议为：lineKeyValueProcess: (value) => +value.toFixed(1) 
+     * 如果支持的最大缩放值为10-100，建议为：lineKeyValueProcess: (value) => +value.toFixed(2) 
+     * 如果支持的最大缩放值>100，建议为：lineKeyValueProcess: (value) => +value.toFixed(3) 
+     * ...
+     * @example
+     * lineKeyValueProcess: (value) => +value.toFixed(2) 
+     */
+    lineKeyValueProcess?: (value: number) => number 
+    /**
+     * 边界值处理，默认不处理，直接返回
+     * 使用场景和缩放相关
+     * @example
+     * edgeValueProcess: (value) => value / scale
+     */
+    edgeValueProcess?: (value: number) => number
 }
 ```
 
@@ -273,6 +290,10 @@ export declare class RefLine<T extends Rect = Rect> {
     getLineFilter(): ((line: RefLineMeta<Rect>) => boolean) | null;
     setLineProcess(process: ((line: RefLineMeta) => void) | null): void
     getLineProcess(): ((line: RefLineMeta) => void) | null
+    setLineKeyValueProcess(process: ((value: number) => number) | null): void;
+    getLineKeyValueProcess(): (value: number) => number;
+    setEdgeValueProcess(process: ((value: number) => number) | null): void;
+    getEdgeValueProcess(): (value: number) => number;
     /**
      * 匹配参考线，主要用于显示
      * @param type
@@ -371,6 +392,9 @@ export declare class RefLine<T extends Rect = Rect> {
         point?: Point;
         distance?: number;
         disableAdsorb?: boolean;
+         /**
+         * @deprecated
+         */
         scale?: number;
     }): (data: {
         pageX?: number;
@@ -379,6 +403,9 @@ export declare class RefLine<T extends Rect = Rect> {
         point?: Point;
         distance?: number;
         disableAdsorb?: boolean;
+        /**
+         * @deprecated
+         */
         scale?: number;
         offsetX?: number;
         offsetY?: number;
