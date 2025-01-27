@@ -103,12 +103,20 @@ interface RefLineOpts<T extends Rect> {
      */
     lineKeyValueProcess?: (value: number) => number 
     /**
+     * @deprecated
      * 边界值处理，默认不处理，直接返回
      * 使用场景和缩放相关
      * @example
      * edgeValueProcess: (value) => value / scale
      */
     edgeValueProcess?: (value: number) => number
+    /**
+     * 单位值处理，默认返回1
+     * 使用场景和缩放相关
+     * @example
+     * unitValueProcess: () => 1 / scale
+     */
+    unitValueProcess?: () => number
 }
 ```
 
@@ -292,8 +300,16 @@ export declare class RefLine<T extends Rect = Rect> {
     getLineProcess(): ((line: RefLineMeta) => void) | null
     setLineKeyValueProcess(process: ((value: number) => number) | null): void;
     getLineKeyValueProcess(): (value: number) => number;
+    /**
+     * @deprecated
+     */
     setEdgeValueProcess(process: ((value: number) => number) | null): void;
+    /**
+     * @deprecated
+     */
     getEdgeValueProcess(): (value: number) => number;
+    setUnitValueProcess(process: (() => number) | null): void;
+    getUnitValueProcess(): () => number;
     /**
      * 匹配参考线，主要用于显示
      * @param type
