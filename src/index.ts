@@ -51,7 +51,6 @@ export interface RefLineOpts<T extends Rect = Rect> {
    * 吸附匹配流程中对吸附线的过滤，包含所有线段
    */
   adsorbLineFilter?: (line: LineGroup<T>) => boolean;
-
   /**
    * 吸附线的值处理，默认取整
    * 如果支持的最大缩放值为1-10，建议为：lineKeyValueProcess: (value) => +value.toFixed(1) 
@@ -61,22 +60,31 @@ export interface RefLineOpts<T extends Rect = Rect> {
    * @example
    * lineKeyValueProcess: (value) => +value.toFixed(2) 
    */
-  lineKeyValueProcess?: (value: number) => number 
+  lineKeyValueProcess?: (value: number) => number
   /**
-   * 边界值处理，默认不处理，直接返回
+   * @deprecated
+   * 使用 unitValueProcess 代替
+  */
+  edgeValueProcess?: (value: number) => number
+  /**
+   * 单位值处理，默认返回1
    * 使用场景和缩放相关
    * @example
-   * edgeValueProcess: (value) => value / scale
+   * unitValueProcess: () => 1 / scale
    */
-  edgeValueProcess?: (value: number) => number
+  unitValueProcess?: () => number
 }
 
 function defaultLineKeyValueProcess(value: number) {
- return fixNumber(value, 0)
+  return fixNumber(value, 0)
 }
 
 function defaultEdgeValueProcess(value: number) {
   return value
+}
+
+function __getUnitValue() {
+  return 1
 }
 
 export class RefLine<T extends Rect = Rect> {
@@ -98,7 +106,12 @@ export class RefLine<T extends Rect = Rect> {
   protected _lineFilter: ((line: RefLineMeta) => boolean) | null = null;
   protected _lineProcess: ((line: RefLineMeta) => void) | null = null
   protected _lineKeyValueProcess: ((value: number) => number) | null = null
+  /**
+  * 使用 unitValueProcess 代替
+  * @deprecated
+  */
   protected _edgeValueProcess: ((value: number) => number) | null = null
+  protected _unitValueProcess: (() => number) | null = null
 
   get rects() {
     if (this._dirty) {
@@ -188,6 +201,7 @@ export class RefLine<T extends Rect = Rect> {
     this._lineProcess = opts?.lineProcess || null;
     this._lineKeyValueProcess = opts?.lineKeyValueProcess || null
     this._edgeValueProcess = opts?.edgeValueProcess || null
+    this._unitValueProcess = opts?.unitValueProcess || null
 
     this._adsorbVLines = opts?.adsorbVLines || [];
     this._adsorbHLines = opts?.adsorbHLines || [];
@@ -204,7 +218,7 @@ export class RefLine<T extends Rect = Rect> {
   }
 
   getOffsetRefLineMetaList(type: LineType, offset: number) {
-    const fixNumber = this.getLineKeyValueProcess() 
+    const fixNumber = this.getLineKeyValueProcess()
     offset = fixNumber(offset);
     const lineMap = type === "vertical" ? this.vLineMap : this.hLineMap;
 
@@ -288,7 +302,7 @@ export class RefLine<T extends Rect = Rect> {
     return this._lineProcess;
   }
 
-  setLineKeyValueProcess(process: ((value: number) => number) | null) {  
+  setLineKeyValueProcess(process: ((value: number) => number) | null) {
     this._lineKeyValueProcess = process
   }
 
@@ -297,12 +311,41 @@ export class RefLine<T extends Rect = Rect> {
     return this._lineKeyValueProcess || defaultLineKeyValueProcess
   }
 
+  /**
+   * 使用 unitValueProcess 代替
+   * @deprecated
+   */
   setEdgeValueProcess(process: ((value: number) => number) | null) {
-    this._edgeValueProcess = process  
+    this._edgeValueProcess = process
   }
 
+  /**
+   * 使用 unitValueProcess 代替
+   * @deprecated
+   */
   getEdgeValueProcess() {
     return this._edgeValueProcess || defaultEdgeValueProcess
+  }
+
+  setUnitValueProcess(process: (() => number) | null) {
+    this._unitValueProcess = process
+  }
+
+  getUnitValueProcess() {
+    if (this._unitValueProcess) {
+      return this._unitValueProcess
+    }
+
+    if (this._edgeValueProcess) {
+      return () => this._edgeValueProcess!(1)
+    }
+
+    return __getUnitValue
+  }
+
+  protected getUnitValue() {
+    const p = this.getUnitValueProcess()
+    return p()
   }
 
   protected toLineMapKey<S>(v: S) {
@@ -310,7 +353,7 @@ export class RefLine<T extends Rect = Rect> {
   }
 
   protected getLineMapKey(line: { offset: number }) {
-    const fixNumber =  this.getLineKeyValueProcess()
+    const fixNumber = this.getLineKeyValueProcess()
     return this.toLineMapKey(fixNumber(line.offset));
   }
 
@@ -441,7 +484,7 @@ export class RefLine<T extends Rect = Rect> {
     let vGroup = groupBy(vLines, (line) => this.getLineMapKey(line));
     let hGroup = groupBy(hLines, (line) => this.getLineMapKey(line));
 
-    const fixNumber =  this.getLineKeyValueProcess()
+    const fixNumber = this.getLineKeyValueProcess()
 
     this._vLines = vGroup.keys.map((key) => {
       const lines = vGroup.group[key];
@@ -523,8 +566,9 @@ export class RefLine<T extends Rect = Rect> {
     let prevDist: number = Infinity;
     let next: number = Infinity;
     let nextDist: number = Infinity;
-    const handleEdgeValue = this.getEdgeValueProcess()
-    const t = handleEdgeValue(0.5);
+    const u = this.getUnitValue()
+    const t = 0.5 * u
+
 
     lines.forEach((line) => {
       if (this.adsorbLineFilter && !this.adsorbLineFilter(line)) {
@@ -655,8 +699,8 @@ export class RefLine<T extends Rect = Rect> {
    */
   getOffsetAdsorbDelta(type: LineType, offset: number, delta: number, adsorbDistance = 5) {
     adsorbDistance = Math.abs(adsorbDistance);
-    const handleEdgeValue = this.getEdgeValueProcess()  
-    const t = handleEdgeValue(1)  
+    const u = this.getUnitValue()
+    const t = 1 * u
 
     if (adsorbDistance < t) return delta;
 
@@ -722,8 +766,8 @@ export class RefLine<T extends Rect = Rect> {
       ...delta,
     };
 
-    const handleEdgeValue = this.getEdgeValueProcess()
-    const t = handleEdgeValue(1);
+    const u = this.getUnitValue()
+    const t = 1 * u
 
     if (adsorbDistance < t) return newDelta;
 
@@ -922,10 +966,10 @@ export class RefLine<T extends Rect = Rect> {
       point?: Point;
       distance?: number;
       disableAdsorb?: boolean;
-       /**
-     * @deprecated
-     * 不再建议使用，当前仅用于计算鼠标偏移量，可根据缩放值提前将pageX、pageY计算好（坐标转换）
-     */
+      /**
+    * @deprecated
+    * 不再建议使用，当前仅用于计算鼠标偏移量，可根据缩放值提前将pageX、pageY计算好（坐标转换）
+    */
       scale?: number;
       // 设置距离起始坐标偏移量，设置后相应的pageX或pageY及scale会失效
       offsetX?: number;
