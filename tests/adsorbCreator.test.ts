@@ -904,8 +904,8 @@ describe("test adsorbCreator", () => {
 
     expect(
       updater({
-        pageX: 3 * scale,
-        pageY: 3 * scale,
+        pageX: 3,
+        pageY: 3,
       })
     ).toMatchObject({
       delta: {
@@ -920,120 +920,40 @@ describe("test adsorbCreator", () => {
 
     expect(
       updater({
-        pageX: 5 * scale,
-        pageY: 5 * scale,
+        pageX: 5,
+        pageY: 5,
       })
     ).toMatchObject({
       delta: {
-        left: 0,
-        top: 0,
+        left: 10,
+        top: 10,
       },
       rect: {
-        left: 0,
-        top: 0,
+        left: 10,
+        top: 10,
       },
     });
 
     expect(
       updater({
-        pageX: 6 * scale,
-        pageY: 6 * scale,
+        pageX: 6,
+        pageY: 6,
       })
     ).toMatchObject({
       delta: {
-        left: 6,
-        top: 6,
+        left: 2,
+        top: 2,
       },
       rect: {
-        left: 6,
-        top: 6,
+        left: 12,
+        top: 12,
       },
     });
 
     expect(
       updater({
-        pageX: 5 * scale,
-        pageY: 5 * scale,
-      })
-    ).toMatchObject({
-      delta: {
-        left: -6,
-        top: -6,
-      },
-      rect: {
-        left: 0,
-        top: 0,
-      },
-    });
-
-    expect(
-      updater({
-        pageX: 1 * scale,
-        pageY: 1 * scale,
-      })
-    ).toMatchObject({
-      delta: {
-        left: 0,
-        top: 0,
-      },
-      rect: {
-        left: 0,
-        top: 0,
-      },
-    });
-
-    expect(
-      updater({
-        pageX: -1 * scale,
-        pageY: -1 * scale,
-      })
-    ).toMatchObject({
-      delta: {
-        left: 0,
-        top: 0,
-      },
-      rect: {
-        left: 0,
-        top: 0,
-      },
-    });
-
-    expect(
-      updater({
-        pageX: -5 * scale,
-        pageY: -5 * scale,
-      })
-    ).toMatchObject({
-      delta: {
-        left: 0,
-        top: 0,
-      },
-      rect: {
-        left: 0,
-        top: 0,
-      },
-    });
-
-    expect(
-      updater({
-        pageX: -6 * scale,
-        pageY: -6 * scale,
-      })
-    ).toMatchObject({
-      delta: {
-        left: -6,
-        top: -6,
-      },
-      rect: {
-        left: -6,
-        top: -6,
-      },
-    });
-
-    expect(
-      updater({
-        pageX: -8 * scale,
-        pageY: -8 * scale,
+        pageX: 5,
+        pageY: 5,
       })
     ).toMatchObject({
       delta: {
@@ -1041,24 +961,104 @@ describe("test adsorbCreator", () => {
         top: -2,
       },
       rect: {
-        left: -8,
-        top: -8,
+        left: 10,
+        top: 10,
       },
     });
 
     expect(
       updater({
-        pageX: 8 * scale,
-        pageY: 8 * scale,
+        pageX: 1,
+        pageY: 1,
       })
     ).toMatchObject({
       delta: {
-        left: 16,
-        top: 16,
+        left: -10,
+        top: -10,
       },
       rect: {
-        left: 8,
-        top: 8,
+        left: 0,
+        top: 0,
+      },
+    });
+
+    expect(
+      updater({
+        pageX: -1,
+        pageY: -1,
+      })
+    ).toMatchObject({
+      delta: {
+        left: 0,
+        top: 0,
+      },
+      rect: {
+        left: 0,
+        top: 0,
+      },
+    });
+
+    expect(
+      updater({
+        pageX: -5,
+        pageY: -5,
+      })
+    ).toMatchObject({
+      delta: {
+        left: -10,
+        top: -10,
+      },
+      rect: {
+        left: -10,
+        top: -10,
+      },
+    });
+
+    expect(
+      updater({
+        pageX: -6,
+        pageY: -6,
+      })
+    ).toMatchObject({
+      delta: {
+        left: -2,
+        top: -2,
+      },
+      rect: {
+        left: -12,
+        top: -12,
+      },
+    });
+
+    expect(
+      updater({
+        pageX: -8,
+        pageY: -8,
+      })
+    ).toMatchObject({
+      delta: {
+        left: -4,
+        top: -4,
+      },
+      rect: {
+        left: -16,
+        top: -16,
+      },
+    });
+
+    expect(
+      updater({
+        pageX: 8,
+        pageY: 8,
+      })
+    ).toMatchObject({
+      delta: {
+        left: 32,
+        top: 32,
+      },
+      rect: {
+        left: 16,
+        top: 16,
       },
     });
   });
@@ -1339,7 +1339,7 @@ describe("test adsorbCreator", () => {
       pageY: 274,
     });
     expect(r4).toMatchObject({
-      delta: { left: 0, top: 1.7057569296375164 },
+      delta: { left: 0, top: 7.832420037984889 },
     });
 
     const r5 = updater({
@@ -1347,7 +1347,7 @@ describe("test adsorbCreator", () => {
       pageY: 275,
     });
     expect(r5).toMatchObject({
-      delta: { left: 0, top: 6.126663108347287 },
+      delta: { left: 0, top: 0 },
     });
 
     const r6 = updater({

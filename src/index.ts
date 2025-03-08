@@ -930,10 +930,6 @@ export class RefLine<T extends Rect = Rect> {
     point?: Point;
     distance?: number;
     disableAdsorb?: boolean;
-    /**
-     * @deprecated
-     * 不再建议使用，当前仅用于计算鼠标偏移量，可根据缩放值提前将pageX、pageY计算好（坐标转换）
-     */
     scale?: number;
   }) {
     if (point) {
@@ -966,10 +962,6 @@ export class RefLine<T extends Rect = Rect> {
       point?: Point;
       distance?: number;
       disableAdsorb?: boolean;
-      /**
-    * @deprecated
-    * 不再建议使用，当前仅用于计算鼠标偏移量，可根据缩放值提前将pageX、pageY计算好（坐标转换）
-    */
       scale?: number;
       // 设置距离起始坐标偏移量，设置后相应的pageX或pageY及scale会失效
       offsetX?: number;
@@ -1050,8 +1042,15 @@ export class RefLine<T extends Rect = Rect> {
       const raw = delta;
 
       if (!disableAdsorb) {
+        let tmp = this._unitValueProcess
+        if (!tmp) {
+          this._unitValueProcess = () => 1 / scale
+        }
+
         this.setCurrent(currentRect);
-        delta = this.getAdsorbDelta(delta, distance || 5, dir);
+        delta = this.getAdsorbDelta(delta, distance || 5 / scale, dir);
+
+        this._unitValueProcess = tmp
       }
 
       currentRect.left += delta.left;
