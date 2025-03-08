@@ -64,6 +64,8 @@ class App extends React.Component {
       : defaultNodes,
   };
 
+  refline: RefLine | null = null;
+
   handleNodeMouseDown(key: string, e: MouseEvent) {
     const { nodes, checked } = this.state;
 
@@ -85,6 +87,8 @@ class App extends React.Component {
       // },
     });
 
+    this.refline = refline;
+
     const updater = refline.adsorbCreator({
       current: node,
       pageX: startX,
@@ -92,7 +96,7 @@ class App extends React.Component {
       distance: 10,
     });
 
-    const un1 = listen(window as any, "mousemove", e => {
+    const un1 = listen(window as any, "mousemove", (e) => {
       const currentX = e.pageX;
       const currentY = e.pageY;
       const leftOffset = currentX - startX;
@@ -182,7 +186,7 @@ class App extends React.Component {
               <input
                 type="checkbox"
                 name="checked"
-                onChange={e => {
+                onChange={(e) => {
                   this.setState({
                     checked: e.target.checked,
                   });
@@ -195,7 +199,7 @@ class App extends React.Component {
             {delta.top.toFixed(0)})
           </div>
           <Background />
-          {adsorbHLines.map(line => {
+          {adsorbHLines.map((line) => {
             return (
               <div
                 data-type="h"
@@ -211,7 +215,7 @@ class App extends React.Component {
               ></div>
             );
           })}
-          {adsorbVLines.map(line => {
+          {adsorbVLines.map((line) => {
             return (
               <div
                 data-type="v"
@@ -227,7 +231,7 @@ class App extends React.Component {
               ></div>
             );
           })}
-          {nodes.map(node => {
+          {nodes.map((node) => {
             return (
               <div
                 className="node"
@@ -247,7 +251,7 @@ class App extends React.Component {
             );
           })}
           {/* 显示参考线 */}
-          <RefLineDemo nodes={nodes} current={current as any} />
+          <RefLineDemo nodes={nodes} current={current as any} refline={this.refline} />
         </div>
       </div>
     );

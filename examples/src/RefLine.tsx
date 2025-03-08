@@ -4,18 +4,20 @@ import React from "react";
 interface Props {
   current: Rect;
   nodes: Rect[];
+  refline?: RefLine;
 }
-export default function Refline({ nodes, current }: Props) {
+export default function Refline({ nodes, current, refline }: Props) {
   if (!current) return null;
-
-  const refline = new RefLine({
-    rects: nodes,
-    current,
-    // lineFilter: line => {
-    //   if (line.position === "hc" || line.position === "vc") return false;
-    //   return true;
-    // },
-  });
+  if (refline) {
+    refline = new RefLine({
+      rects: nodes,
+      current,
+      // lineFilter: line => {
+      //   if (line.position === "hc" || line.position === "vc") return false;
+      //   return true;
+      // },
+    });
+  }
 
   const lines = refline.getAllRefLines();
 
