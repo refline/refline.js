@@ -42,7 +42,7 @@ export interface RefLineOpts<T extends Rect = Rect> {
   /**
    * 自定义处理矩形生成的吸附线，不包含自定义吸附线
    */
-  lineProcess?: (line: RefLineMeta<T>) => void
+  lineProcess?: (line: RefLineMeta<T>) => void;
   // 自定义垂直吸附线
   adsorbVLines?: Omit<AdsorbLine, "type">[];
   // 自定义水平吸附线
@@ -53,38 +53,38 @@ export interface RefLineOpts<T extends Rect = Rect> {
   adsorbLineFilter?: (line: LineGroup<T>) => boolean;
   /**
    * 吸附线的值处理，默认取整
-   * 如果支持的最大缩放值为1-10，建议为：lineKeyValueProcess: (value) => +value.toFixed(1) 
-   * 如果支持的最大缩放值为10-100，建议为：lineKeyValueProcess: (value) => +value.toFixed(2) 
-   * 如果支持的最大缩放值>100，建议为：lineKeyValueProcess: (value) => +value.toFixed(3) 
+   * 如果支持的最大缩放值为1-10，建议为：lineKeyValueProcess: (value) => +value.toFixed(1)
+   * 如果支持的最大缩放值为10-100，建议为：lineKeyValueProcess: (value) => +value.toFixed(2)
+   * 如果支持的最大缩放值>100，建议为：lineKeyValueProcess: (value) => +value.toFixed(3)
    * ...
    * @example
-   * lineKeyValueProcess: (value) => +value.toFixed(2) 
+   * lineKeyValueProcess: (value) => +value.toFixed(2)
    */
-  lineKeyValueProcess?: (value: number) => number
+  lineKeyValueProcess?: (value: number) => number;
   /**
    * @deprecated
    * 使用 unitValueProcess 代替
-  */
-  edgeValueProcess?: (value: number) => number
+   */
+  edgeValueProcess?: (value: number) => number;
   /**
    * 单位值处理，默认返回1
    * 使用场景和缩放相关
    * @example
    * unitValueProcess: () => 1 / scale
    */
-  unitValueProcess?: () => number
+  unitValueProcess?: () => number;
 }
 
 function defaultLineKeyValueProcess(value: number) {
-  return fixNumber(value, 0)
+  return fixNumber(value, 0);
 }
 
 function defaultEdgeValueProcess(value: number) {
-  return value
+  return value;
 }
 
 function __getUnitValue() {
-  return 1
+  return 1;
 }
 
 export class RefLine<T extends Rect = Rect> {
@@ -104,14 +104,14 @@ export class RefLine<T extends Rect = Rect> {
   protected _adsorbVLines: AdsorbVLine[] = [];
   protected _adsorbHLines: AdsorbHLine[] = [];
   protected _lineFilter: ((line: RefLineMeta) => boolean) | null = null;
-  protected _lineProcess: ((line: RefLineMeta) => void) | null = null
-  protected _lineKeyValueProcess: ((value: number) => number) | null = null
+  protected _lineProcess: ((line: RefLineMeta) => void) | null = null;
+  protected _lineKeyValueProcess: ((value: number) => number) | null = null;
   /**
-  * 使用 unitValueProcess 代替
-  * @deprecated
-  */
-  protected _edgeValueProcess: ((value: number) => number) | null = null
-  protected _unitValueProcess: (() => number) | null = null
+   * 使用 unitValueProcess 代替
+   * @deprecated
+   */
+  protected _edgeValueProcess: ((value: number) => number) | null = null;
+  protected _unitValueProcess: (() => number) | null = null;
 
   get rects() {
     if (this._dirty) {
@@ -199,9 +199,9 @@ export class RefLine<T extends Rect = Rect> {
 
     this._lineFilter = opts?.lineFilter || null;
     this._lineProcess = opts?.lineProcess || null;
-    this._lineKeyValueProcess = opts?.lineKeyValueProcess || null
-    this._edgeValueProcess = opts?.edgeValueProcess || null
-    this._unitValueProcess = opts?.unitValueProcess || null
+    this._lineKeyValueProcess = opts?.lineKeyValueProcess || null;
+    this._edgeValueProcess = opts?.edgeValueProcess || null;
+    this._unitValueProcess = opts?.unitValueProcess || null;
 
     this._adsorbVLines = opts?.adsorbVLines || [];
     this._adsorbHLines = opts?.adsorbHLines || [];
@@ -218,7 +218,7 @@ export class RefLine<T extends Rect = Rect> {
   }
 
   getOffsetRefLineMetaList(type: LineType, offset: number) {
-    const fixNumber = this.getLineKeyValueProcess()
+    const fixNumber = this.getLineKeyValueProcess();
     offset = fixNumber(offset);
     const lineMap = type === "vertical" ? this.vLineMap : this.hLineMap;
 
@@ -303,12 +303,11 @@ export class RefLine<T extends Rect = Rect> {
   }
 
   setLineKeyValueProcess(process: ((value: number) => number) | null) {
-    this._lineKeyValueProcess = process
+    this._lineKeyValueProcess = process;
   }
 
-
   getLineKeyValueProcess() {
-    return this._lineKeyValueProcess || defaultLineKeyValueProcess
+    return this._lineKeyValueProcess || defaultLineKeyValueProcess;
   }
 
   /**
@@ -316,7 +315,7 @@ export class RefLine<T extends Rect = Rect> {
    * @deprecated
    */
   setEdgeValueProcess(process: ((value: number) => number) | null) {
-    this._edgeValueProcess = process
+    this._edgeValueProcess = process;
   }
 
   /**
@@ -324,28 +323,28 @@ export class RefLine<T extends Rect = Rect> {
    * @deprecated
    */
   getEdgeValueProcess() {
-    return this._edgeValueProcess || defaultEdgeValueProcess
+    return this._edgeValueProcess || defaultEdgeValueProcess;
   }
 
   setUnitValueProcess(process: (() => number) | null) {
-    this._unitValueProcess = process
+    this._unitValueProcess = process;
   }
 
   getUnitValueProcess() {
     if (this._unitValueProcess) {
-      return this._unitValueProcess
+      return this._unitValueProcess;
     }
 
     if (this._edgeValueProcess) {
-      return () => this._edgeValueProcess!(1)
+      return () => this._edgeValueProcess!(1);
     }
 
-    return __getUnitValue
+    return __getUnitValue;
   }
 
   protected getUnitValue() {
-    const p = this.getUnitValueProcess()
-    return p()
+    const p = this.getUnitValueProcess();
+    return p();
   }
 
   protected toLineMapKey<S>(v: S) {
@@ -353,7 +352,7 @@ export class RefLine<T extends Rect = Rect> {
   }
 
   protected getLineMapKey(line: { offset: number }) {
-    const fixNumber = this.getLineKeyValueProcess()
+    const fixNumber = this.getLineKeyValueProcess();
     return this.toLineMapKey(fixNumber(line.offset));
   }
 
@@ -371,7 +370,7 @@ export class RefLine<T extends Rect = Rect> {
 
   protected getRectRefLines(rect: T) {
     let lines = getRectRefLines(rect, {
-      lineProcess: this.getLineProcess()
+      lineProcess: this.getLineProcess(),
     });
 
     // const lineProcess = this.getLineProcess()
@@ -484,7 +483,7 @@ export class RefLine<T extends Rect = Rect> {
     let vGroup = groupBy(vLines, (line) => this.getLineMapKey(line));
     let hGroup = groupBy(hLines, (line) => this.getLineMapKey(line));
 
-    const fixNumber = this.getLineKeyValueProcess()
+    const fixNumber = this.getLineKeyValueProcess();
 
     this._vLines = vGroup.keys.map((key) => {
       const lines = vGroup.group[key];
@@ -566,9 +565,8 @@ export class RefLine<T extends Rect = Rect> {
     let prevDist: number = Infinity;
     let next: number = Infinity;
     let nextDist: number = Infinity;
-    const u = this.getUnitValue()
-    const t = 0.5 * u
-
+    const u = this.getUnitValue();
+    const t = 0.5 * u;
 
     lines.forEach((line) => {
       if (this.adsorbLineFilter && !this.adsorbLineFilter(line)) {
@@ -699,8 +697,8 @@ export class RefLine<T extends Rect = Rect> {
    */
   getOffsetAdsorbDelta(type: LineType, offset: number, delta: number, adsorbDistance = 5) {
     adsorbDistance = Math.abs(adsorbDistance);
-    const u = this.getUnitValue()
-    const t = 1 * u
+    const u = this.getUnitValue();
+    const t = 1 * u;
 
     if (adsorbDistance < t) return delta;
 
@@ -766,13 +764,13 @@ export class RefLine<T extends Rect = Rect> {
       ...delta,
     };
 
-    const u = this.getUnitValue()
-    const t = 1 * u
+    const u = this.getUnitValue();
+    const t = 1 * u;
 
     if (adsorbDistance < t) return newDelta;
 
     const refLineMetaList = getRectRefLines(rect, {
-      lineProcess: this.getLineProcess()
+      lineProcess: this.getLineProcess(),
     });
     const lineStatus = [
       this.isEnableLine(refLineMetaList[0]),
@@ -1042,15 +1040,15 @@ export class RefLine<T extends Rect = Rect> {
       const raw = delta;
 
       if (!disableAdsorb) {
-        let tmp = this._unitValueProcess
+        let tmp = this._unitValueProcess;
         if (!tmp) {
-          this._unitValueProcess = () => 1 / scale
+          this._unitValueProcess = () => 1 / scale;
         }
 
         this.setCurrent(currentRect);
         delta = this.getAdsorbDelta(delta, distance || 5 / scale, dir);
 
-        this._unitValueProcess = tmp
+        this._unitValueProcess = tmp;
       }
 
       currentRect.left += delta.left;
